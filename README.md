@@ -197,7 +197,7 @@ The dependencies of this program are listed below:
 
 <span id="tab1">*: paths to the header and library files are not included (e.g., `-I/path/to/include -L/path/to/lib`).</span>
 
-By default, the density fields are stored as double-precision floating point numbers, with FFTs performed in double precision as well. If the memory consumption is an issue, the program can also be compiled with the `-DSINGLE_PREC` flag, to enabled single-precision density fields and FFTs. Note that in this case FFTW has to be compiled with single precision too (see the [FFTW documentation](http://www.fftw.org/fftw3_doc/Installation-and-Customization.html) for details).
+The density fields are stored as double-precision floating point numbers by default, with FFTs performed in double precision as well. If the memory consumption is an issue, the program can also be compiled with the `-DSINGLE_PREC` flag, to enabled single-precision density fields and FFTs. Note that in this case FFTW has to be compiled with single precision too (see the [FFTW documentation](http://www.fftw.org/fftw3_doc/Installation-and-Customization.html) for details).
 
 Once the mandatory dependencies are installed, and the corresponding compilation flags are set in the [`Makefile`](Makefile), this program can be compiled with a C compiler that supports the C99 standard, by simply the command
 
@@ -300,7 +300,7 @@ DATA_FORMATTER = "%*d,%10s,%[123]"
 
 <sub>[\[TOC\]](#table-of-contents)</sub>
 
-#### `DATA_POSITION`, `DATA_POSITION`
+#### `DATA_POSITION`, `RAND_POSITION`
 
 3-D coordinates, in the order of \[*x*<sub>0</sub>, *x*<sub>1</sub>, *x*<sub>2</sub>\] or \[RA, Dec, redshift\], where RA and Dec must be in degrees. They must be 3- or 6-element string arrays. If `DATA_CATALOG` or `RAND_CATALOG` contains only one element, then the corresponding positions must be 3-element arrays. While if there are two elements for `DATA_CATALOG` or `RAND_CATALOG`, there should be 6 elements for the positions.
 
