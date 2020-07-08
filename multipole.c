@@ -6,7 +6,7 @@
 * Github repository:
         https://github.com/cheng-zhao/powspec
 
-* Copyright (c) 2020 Cheng Zhao <zhaocheng03@gmail.com>  [GPL-v3 license]
+* Copyright (c) 2020 Cheng Zhao <zhaocheng03@gmail.com>  [GPLv3 license]
 
 *******************************************************************************/
 

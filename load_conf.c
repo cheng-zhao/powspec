@@ -492,7 +492,8 @@ static int check_output(char *fname, const char *key, const int ovwrite) {
       for (int i = 0; i != ovwrite; i--) {
         fprintf(stderr, "Are you going to overwrite it? (y/n): ");
         if (scanf("%c", &confirm) != 1) continue;
-        while(getchar() != '\n');       /* ignore pending characters */
+        int c;
+        while((c = getchar()) != '\n' && c != EOF) continue;
         if (confirm == 'n') {
           P_ERR("cannot write to the file.\n");
           return POWSPEC_ERR_FILE;

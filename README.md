@@ -1,6 +1,5 @@
 # powspec
 
-[![license](https://img.shields.io/github/license/cheng-zhao/powspec.svg)](./LICENSE.txt)
 ![Codacy grade](https://img.shields.io/codacy/grade/5a6835fc4cee49d4993380ad1a45ad69.svg)
 
 ## Table of Contents
@@ -32,6 +31,10 @@ This is a C program for computing auto and cross power spectrum multipoles *P*<s
 It is designed in the hope of being (both time and space) efficient, portable, and user-friendly. To this end, various operations are provided for pre-processing the data on-the-fly and in parallel, with a least number of external dependencies. Moreover, little programming knowledge is required for the usage of the code, and the user is only ask for a form-like configuration file.
 
 This program is compliant with the ISO C99 and IEEE POSIX.1-2008 standards. Parallelisation can be enabled with [OpenMP](https://www.openmp.org). Thus it is compatible with most of the modern C compilers and operating systems. It is written by Cheng Zhao (&#36213;&#25104;). And as a whole, it is released under the [GPLv3 license](LICENSE.txt), due to its reliance on the [FFTW library](http://www.fftw.org), though many of the source files are distributed under the [MIT license](LICENSE_MIT.txt), as indicated in their header lines.
+
+If you use this tool in research that results in publications, please cite the following paper:
+
+> Zhao et al., in preparation.
 
 <sub>[\[TOC\]](#table-of-contents)</sub>
 
@@ -297,7 +300,7 @@ DATA_FORMATTER = "%*d,%10s,%[123]"
 
 #### `DATA_POSITION`, `DATA_POSITION`
 
-3-D coordinates, in the order of [*x*<sub>0</sub>, *x*<sub>1</sub>, *x*<sub>2</sub>] or [RA, Dec, redshift], where RA and Dec must be in degrees. They must be 3- or 6-element string arrays. If `DATA_CATALOG` or `RAND_CATALOG` contains only one element, then the corresponding positions must be 3-element arrays. While if there are two elements for `DATA_CATALOG` or `RAND_CATALOG`, there should be 6 elements for the positions.
+3-D coordinates, in the order of \[*x*<sub>0</sub>, *x*<sub>1</sub>, *x*<sub>2</sub>\] or \[RA, Dec, redshift\], where RA and Dec must be in degrees. They must be 3- or 6-element string arrays. If `DATA_CATALOG` or `RAND_CATALOG` contains only one element, then the corresponding positions must be 3-element arrays. While if there are two elements for `DATA_CATALOG` or `RAND_CATALOG`, there should be 6 elements for the positions.
 
 The strings must be column indicators, or expressions, which are parsed using the [libast](https://github.com/cheng-zhao/libast) library. Columns are indicated by <span><code>${&bull;}</code></span>, where <span><code>&bull;</code></span> must be a number for ASCII format files, and a string for FITS tables. For instance, the 3rd column of an ASCII file can be indicated by `$3`, and the "RA" column of a FITS table can be indicated by `${RA}`. Note that if there are more than one digits for the ASCII column numbers, the number must be enclosed by braces, e.g, `${10}`. And if an ASCII column is omitted via the formatter (e.g. `%*lf`), it is not counted for the column number.
 
