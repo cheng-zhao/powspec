@@ -197,7 +197,7 @@ The dependencies of this program are listed below:
 
 <span id="tab1">*: paths to the header and library files are not included (e.g., `-I/path/to/include -L/path/to/lib`).</span>
 
-By default, the density fields are stored as double-precision floating point numbers, with FFTs performed in double precision as well. If the memory consumption is an issue, the program can also be compiled with the `-DSINGLE_PREC` flag, to enabled single-precision density fields and FFTs. Note that in this case FFTW has to be compiled with single precision too (see the [FFTW documentation](#http://www.fftw.org/fftw3_doc/Installation-and-Customization.html) for details]
+By default, the density fields are stored as double-precision floating point numbers, with FFTs performed in double precision as well. If the memory consumption is an issue, the program can also be compiled with the `-DSINGLE_PREC` flag, to enabled single-precision density fields and FFTs. Note that in this case FFTW has to be compiled with single precision too (see the [FFTW documentation](#http://www.fftw.org/fftw3_doc/Installation-and-Customization.html) for details).
 
 Once the mandatory dependencies are installed, and the corresponding compilation flags are set in the [`Makefile`](Makefile), this program can be compiled with a C compiler that supports the C99 standard, by simply the command
 
