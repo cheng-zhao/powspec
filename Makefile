@@ -10,6 +10,9 @@ ifneq ($(FFTW_DIR),)
   INCL += -I$(FFTW_DIR)/include
 endif
 
+# Setting for single precision density fields and FFT
+#LIBS += -DSINGLE_PREC
+
 # Settings for OpenMP (comment the following line to disable OpenMP)
 LIBS += -DOMP -fopenmp -lfftw3_omp
 
