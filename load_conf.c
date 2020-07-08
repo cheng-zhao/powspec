@@ -44,6 +44,10 @@ Function `usage`:
 static void usage(void *args) {
   printf("Usage: POWSPEC [OPTION]\n\
 Compute the auto and cross power spectra from catalogs.\n\
+  -h, --help\n\
+        Display this message and exit\n\
+  -t, --template\n\
+        Print a template configuration file to the standard output and exit\n\
   -c, --conf            " FMT_KEY(CONFIG_FILE) "     String\n\
         Specify the configuration file (default: `%s')\n\
   -d, --data            " FMT_KEY(DATA_CATALOG) "    String array\n\
@@ -123,7 +127,7 @@ Compute the auto and cross power spectra from catalogs.\n\
         Indicate whether to display detailed standard outputs\n\
 Consult the -t option for more information on the parameters.\n\
 Github repository: https://github.com/cheng-zhao/powspec.\n\
-Licence: GPL-v3.\n",
+Licence: GPLv3.\n",
     DEFAULT_CONF_FILE);
   exit(0);
 }
