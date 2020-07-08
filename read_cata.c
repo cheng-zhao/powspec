@@ -85,13 +85,13 @@ Return:
 ******************************************************************************/
 CATA *read_cata(const CONF *conf) {
   printf("Reading catalogs ...");
-  if (conf->verbose) printf("\n");
-  fflush(stdout);
-
   if (!conf) {
     P_ERR("configuration parameters not loaded.\n");
     return NULL;
   }
+  if (conf->verbose) printf("\n");
+  fflush(stdout);
+
 
   CATA *cat = cata_init(conf->ndata);
   if (!cat) return NULL;

@@ -1178,13 +1178,13 @@ Return:
 ******************************************************************************/
 PK *powspec(const CONF *conf, const CATA *cat, MESH *mesh) {
   printf("Evaluating power spectra ...");
-  if (conf->verbose) printf("\n");
-  fflush(stdout);
-
   if (!conf) {
     P_ERR("configuration parameters not loaded.\n");
     return NULL;
   }
+  if (conf->verbose) printf("\n");
+  fflush(stdout);
+
   if (!cat) {
     P_ERR("catalogs not read.\n");
     return NULL;

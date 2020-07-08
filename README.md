@@ -1,6 +1,7 @@
 # powspec
 
-![GitHub](https://img.shields.io/github/license/cheng-zhao/powspec.svg) 
+[![license](https://img.shields.io/github/license/cheng-zhao/powspec.svg)](./LICENSE.txt)
+![Codacy grade](https://img.shields.io/codacy/grade/5a6835fc4cee49d4993380ad1a45ad69.svg)
 
 ## Table of Contents
 
@@ -59,7 +60,7 @@ For a cubic simulation box, tracers are distributed to a regular 3-D mesh for Fa
     -   *w* = (3/2 &minus; *d*)<sup>2</sup>/2,&emsp;if 1/2 &le; *d* &lt; 1;
     -   *w* = 0,&emsp;otherwise;
 -   Piecewise Cubic Spline (PCS):
-    -   *w* = (4 &minus; 6 *d*<sup>2</sup> + 3 *d*<sup>3</sup>)/6,&emsp;if |*d*| &lt; 1;
+    -   *w* = (4 &minus; 6&thinsp;*d*<sup>2</sup> + 3&thinsp;*d*<sup>3</sup>)/6,&emsp;if |*d*| &lt; 1;
     -   *w* = (2 &minus; *d*)<sup>3</sup>/6,&emsp;if 1 &le; |*d*| &lt; 2;
     -   *w* = 0,&emsp;otherwise;
 
@@ -100,12 +101,14 @@ Due to the non-trivial geometry and completeness of survey-like data, random cat
 The key of the coordinate conversion process is the relationship between redshift *z* and radial comoving distance *r*. Once this relationship is evaluated, the comoving coordinates are then simply given by
 
 *x*<sub>0</sub> = *r* cos&thinsp;(Dec) cos&thinsp;(RA) ,
+
 *x*<sub>1</sub> = *r* cos&thinsp;(Dec) sin&thinsp;(RA) ,
+
 *x*<sub>2</sub> = *r* sin&thinsp;(Dec) .
 
 This program implements the conversion from *z* to *r* within the framework of a *w*CDM cosmology:
 
-*r* = &int;<sub><sub>0</sub></sub><sup><sup>*z*</sup></sup> *c* d&thinsp;*z*&prime;/[*H*<sub>0</sub> *E*&thinsp;(*z*&prime;)] ,
+*r* = &int;<sub><sub>0</sub></sub><sup><sup>*z*</sup></sup> *c* d&thinsp;*z*&prime;/\[*H*<sub>0</sub> *E*&thinsp;(*z*&prime;)\] ,
 
 where *H*<sub>0</sub> indicates the Hubble parameter at present (*z* = 0), and *E*&thinsp;(*z*) denotes the reduced Hubble parameter:
 
@@ -117,7 +120,7 @@ Here, &Omega;<sub>m</sub>, &Omega;<sub>*k*</sub>, and &Omega;<sub>&Lambda;</sub>
 
 Furthermore, to ensure *E*<sup>2</sup>&thinsp;(*z*) &gt; 0, the following condition has to be satisfied:
 
-3*w*&Omega;<sub>m</sub><sup>(3*w*+1)/(3*w*)</sup>&Omega;<sub>&Lambda;</sub> &lt; &Omega;<sub>*k*</sub>[&minus;(3*w*+1)&Omega;<sub>&Lambda;</sub>]<sup>(3*w*+1)/(3*w*)</sup> .
+3*w*&Omega;<sub>m</sub><sup>(3*w*+1)/(3*w*)</sup>&Omega;<sub>&Lambda;</sub> &lt; &Omega;<sub>*k*</sub>\[&minus;(3*w*+1)&Omega;<sub>&Lambda;</sub>\]<sup>(3*w*+1)/(3*w*)</sup> .
 
 The integration for the *z* to *r* conversion is performed using the [*Legendre-Gauss* Quadrature](https://mathworld.wolfram.com/Legendre-GaussQuadrature.html) algorithm. The program uniformly samples 128 (customisable in [define.h](define.h#L82)) redshift values in the redshift range of the input catalogues, and checks the maximum order needed for the desired integration precision. This order is then used for the coordinate conversion of all the input objects.
 
@@ -145,7 +148,7 @@ Once *L*<sub>box</sub> is decided, the input catalogues are placed at the centre
 
 Given the data and random catalogues, the weighted density field is given by
 
-*F*&thinsp;(***r***) = *w*<sub>FKP</sub>&thinsp;(***r***) &middot; [*n*<sub>d</sub>&thinsp;(***r***) &minus; *&alpha;*&thinsp;*n*<sub>r</sub>&thinsp;(***r***)] ,
+*F*&thinsp;(***r***) = *w*<sub>FKP</sub>&thinsp;(***r***) &middot; \[*n*<sub>d</sub>&thinsp;(***r***) &minus; *&alpha;*&thinsp;*n*<sub>r</sub>&thinsp;(***r***)\] ,
 
 where *w*<sub>FKP</sub> is the so-called FKP weight, for reducing the variance of the power spectra<sup>[\[4\]](#ref4)</sup>. *n*<sub>d</sub>&thinsp;(***r***) and *n*<sub>r</sub>&thinsp;(***r***) are the density field for the data and random catalogues respectively. And *&alpha;* is the weighted ratio between the data and random samples:
 
@@ -161,13 +164,13 @@ The weighted density field is then Fourier transformed using FFTW. Moreover, if 
 
 The power spectrum multipoles are estimated by<sup>[\[5\]](#ref5)[\[6\]](#ref6)</sup>
 
-*P*<sub>&ell;</sub>&thinsp;(*k*) = [&thinsp;(2&ell;+1) &langle;*F*<sub>0</sub>&thinsp;(***k***) *F*<sub>&ell;</sub>&thinsp;(***k***)&rangle; &minus; (1+*&alpha;*)&thinsp;*I*<sub>12</sub>&thinsp;] / *I*<sub>22</sub> ,
+*P*<sub>&ell;</sub>&thinsp;(*k*) = \[&thinsp;(2&ell;+1) &langle;*F*<sub>0</sub>&thinsp;(***k***) *F*<sub>&ell;</sub>&thinsp;(***k***)&rangle; &minus; (1+*&alpha;*)&thinsp;*I*<sub>12</sub>&thinsp;\] / *I*<sub>22</sub> ,
 
 where
 
 *I*<sub>*ab*</sub> = &int;&thinsp;d<sup>3</sup>&thinsp;*r* *&ntilde;*<sup>*a*</sup>&thinsp;(***r***) *w*<sup>*b*</sup><sub>FKP</sub>&thinsp;(***r***) ,
 
-*F*<sub>&ell;</sub>&thinsp;(***k***) = &int;&thinsp;d<sup>3</sup>&thinsp;*r* *F*&thinsp;(***r***) exp&thinsp;(*i*&thinsp;***k***&thinsp;&middot;&thinsp;***r***) *L*<sub>&ell;</sub>&thinsp;[&thinsp;***k***&thinsp;&middot;&thinsp;***r***/(|***k***||***r***|)&thinsp;] .
+*F*<sub>&ell;</sub>&thinsp;(***k***) = &int;&thinsp;d<sup>3</sup>&thinsp;*r* *F*&thinsp;(***r***) exp&thinsp;(*i*&thinsp;***k***&thinsp;&middot;&thinsp;***r***) *L*<sub>&ell;</sub>&thinsp;\[&thinsp;***k***&thinsp;&middot;&thinsp;***r***/(|***k***||***r***|)&thinsp;\] .
 
 And *&ntilde;* denotes the comoving number density of the tracers.
 
@@ -209,7 +212,7 @@ A list of the supported command line options can be displaced using the `-h` or 
 
 ### Specifications of the input catalogues
 
-####   `DATA_CATALOG`, `RAND_CATALOG`
+#### `DATA_CATALOG`, `RAND_CATALOG`
 
 Filename of the input data and random catalogues. They can be either strings or 2-element string arrays. If the cross power spectrum is required, then the data and random catalogues must be string arrays. For simulation boxes, `RAND_CATALOG` is not mandatory.
 

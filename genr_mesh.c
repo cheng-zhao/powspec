@@ -873,13 +873,13 @@ Return:
 ******************************************************************************/
 MESH *genr_mesh(const CONF *conf, CATA *cat) {
   printf("Generating meshes for FFT ...");
-  if (conf->verbose) printf("\n");
-  fflush(stdout);
-
   if (!conf) {
     P_ERR("configuration parameters not loaded.\n");
     return NULL;
   }
+  if (conf->verbose) printf("\n");
+  fflush(stdout);
+
   if (!cat) {
     P_ERR("catalogs not read.\n");
     return NULL;

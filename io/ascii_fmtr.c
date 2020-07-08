@@ -137,8 +137,8 @@ asc_arg_t *parse_ascii_fmtr(const char *fmtr, int *num, int *rnum) {
 
     const char *ptr = fmt - 1;
     /* Check the maximum field width (a decimal integer greater than 0). */
-    int width = 0;
     if (isdigit(c)) {
+      int width = 0;
       /* Read the width. */
       while (isdigit(c)) {
         int digit = c - '0';
