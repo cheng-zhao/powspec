@@ -75,7 +75,7 @@ The window effect induced by the particle assignment scheme is then corrected fo
 
 #### Grid interlacing
 
-To reduce the "alias" effects of particle assignments, the grid interlacing technique<sup>[\[1\]](#ref1)</sup> is implemented. It generates an addition real-space density field with a shift of half the cell size (*H*/2) on all directions. The two densities fields are combined in Fourier space, which is then used for power spectrum evaluation.
+To reduce the "alias" effects of particle assignments, the grid interlacing technique<sup>[\[1\]](#ref1)</sup> is implemented. It generates an addition real-space density field with a shift of half the cell size (*H*/2) on all directions. The two densities fields are combined in Fourier space, and the combined field is then used for power spectrum evaluation.
 
 Since the density field is real, we use the real-to-complex routines of the FFTW library for Fourier transforms, to increase both time and space efficiencies.
 
@@ -213,7 +213,7 @@ By default, an executable `POWSPEC` is created on success.
 
 Configuration files and command line options for this program are parsed using the [libcfg](https://github.com/cheng-zhao/libcfg) library. The default name of the configuration file is [`powspec.conf`](powspec.conf), which is customisable in [`define.h`](define.h#L49). Custom configuration files can also be passed to the program using the `-c` or `--conf` command line options.
 
-A list of the supported command line options can be displaced using the `-h` or `--help` flags, and a template configuration file is printed with the `-t` or `--template` flags. And please consult [libcfg](https://github.com/cheng-zhao/libcfg) for the formats of the configuration files and command line options.
+A list of the supported command line options can be displaced using the `-h` or `--help` flags, and a template configuration file is printed with the `-t` or `--template` flags. Please consult [libcfg](https://github.com/cheng-zhao/libcfg) for the formats of the configuration files and command line options.
 
 ### Specifications of the input catalogues
 
@@ -405,7 +405,7 @@ Dark energy equation of state. It must be a double-precision floating point numb
 
 The tolerance of the integration error. It must be larger than the [machine epsilon](https://en.wikipedia.org/wiki/Machine_epsilon), i.e., around `1e-16`.
 
-#### `Z_CMVDST_CONV`
+#### `Z_CMVDST_CNVT`
 
 Filename of an ASCII table for redshift to radial comoving distance (in Mpc/*h*) conversion. The first two columns of this file have to be redshift and radial comoving distance, respectively. If the columns or units are not appropriate, the file can be passed to the program via command line options and pipe, e.g.
 
