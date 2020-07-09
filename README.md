@@ -75,7 +75,7 @@ The window effect induced by the particle assignment scheme is then corrected fo
 
 #### Grid interlacing
 
-To reduce the "alias" effects of particle assignments, the grid interlacing technique<sup>[\[1\]](#ref1)</sup> is implemented. It generates an addition real-space density field with a shift of half the cell size (*H*/2) on all directions. The two densities fields are then combined in Fourier space, which is then used for power spectrum evaluation.
+To reduce the "alias" effects of particle assignments, the grid interlacing technique<sup>[\[1\]](#ref1)</sup> is implemented. It generates an addition real-space density field with a shift of half the cell size (*H*/2) on all directions. The two densities fields are combined in Fourier space, which is then used for power spectrum evaluation.
 
 Since the density field is real, we use the real-to-complex routines of the FFTW library for Fourier transforms, to increase both time and space efficiencies.
 
@@ -83,7 +83,7 @@ Since the density field is real, we use the real-to-complex routines of the FFTW
 
 #### Multipole evaluation
 
-The power spectrum is evaluated by mode counts of the Fourier space density field *&delta;*&thinsp;(***k***). And the multipoles are given by
+The power spectrum is evaluated via mode counts of the Fourier space density field *&delta;*&thinsp;(***k***). And the multipoles are given by
 
 *P*<sub>&ell;</sub>&thinsp;(*k*) = &langle; |&thinsp;*&delta;*&thinsp;(***k***) *&delta;*&thinsp;(&minus;***k***)&thinsp;| *L*<sub>&ell;</sub>&thinsp;(*&mu;*) &rangle; .
 
@@ -125,7 +125,7 @@ Furthermore, to ensure *E*<sup>2</sup>&thinsp;(*z*) &gt; 0, the following condit
 
 3*w*&Omega;<sub>m</sub><sup>(3*w*+1)/(3*w*)</sup>&Omega;<sub>&Lambda;</sub> &lt; &Omega;<sub>*k*</sub>\[&minus;(3*w*+1)&Omega;<sub>&Lambda;</sub>\]<sup>(3*w*+1)/(3*w*)</sup> .
 
-The integration for the *z* to *r* conversion is performed using the [*Legendre-Gauss* Quadrature](https://mathworld.wolfram.com/Legendre-GaussQuadrature.html) algorithm. The program uniformly samples 128 (customisable in [define.h](define.h#L82)) redshift values in the redshift range of the input catalogues, and checks the maximum order needed for the desired integration precision. This order is then used for the coordinate conversion of all the input objects.
+The integration for the *z* to *r* conversion is performed using the [*Legendre-Gauss* Quadrature](https://mathworld.wolfram.com/Legendre-GaussQuadrature.html) algorithm. The program uniformly samples 128 (customisable in [define.h](define.h#L94)) redshift values in the redshift range of the input catalogues, and checks the maximum order needed for the desired integration precision. This order is then used for the coordinate conversion of all the input objects.
 
 For non-*w*CDM cosmologies, the program itself cannot convert *z* to *r*, but it is able to interpolate a table of (*z*, *r*) pairs for coordinate conversions, where the unit of the radial comoving distance has to be Mpc/*h*. And the interpolation is performed using a cubic-spline algorithm<sup>[\[3\]](#ref3)</sup>.
 
@@ -531,7 +531,7 @@ A boolean value indicating whether to show detailed standard outputs.
 
 ## Acknowledgements
 
-This program benefits greatly from the open-source [nbodykit](https://nbodykit.readthedocs.io/en/latest/index.html) project<sup>[\[8\]](#ref8)</sup>. And I thank Dr. Chia-Hsun Chuang for helpful discussion on the early-stage development of this program. 
+This program benefits greatly from the open-source [nbodykit](https://nbodykit.readthedocs.io/en/latest/index.html) project<sup>[\[8\]](#ref8)</sup>. And I thank Dr. Chia-Hsun Chuang for helpful discussions on the early-stage development of this program. 
 
 <sub>[\[TOC\]](#table-of-contents)</sub>
 
