@@ -4,7 +4,7 @@ LIBS = -lm -lfftw3
 INCL = -Isrc -Iio -Ilib -Imath
 
 # Settings for FFTW
-FFTW_DIR = /Users/czhao/lib/fftw-3.3.8
+FFTW_DIR = 
 ifneq ($(FFTW_DIR),)
   LIBS += -L$(FFTW_DIR)/lib
   INCL += -I$(FFTW_DIR)/include
