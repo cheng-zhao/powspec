@@ -692,6 +692,11 @@ int read_ascii_data(const char *fname, const size_t skip, const char comment,
   if (nomp > 1) {
     if (!(pcol = malloc(sizeof(asc_col_t *) * (nomp - 1)))) {
       P_ERR("failed to allocate memory for thread-private columns\n");
+      POWSPEC_QUIT(POWSPEC_ERR_MEMORY);
+    }
+    for (int j = 0; j < nomp - 1; j++) {
+      if (!(pcol[j] = malloc(sizeof(asc_col_t) * rnc))) {
+        P_ERR("failed to allocate memory for thread-private columns\n");
         POWSPEC_QUIT(POWSPEC_ERR_MEMORY);
       }
       memcpy(pcol[j], col, sizeof(asc_col_t) * rnc);
