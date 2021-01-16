@@ -125,7 +125,7 @@ Furthermore, to ensure *E*<sup>2</sup>&thinsp;(*z*) &gt; 0, the following condit
 
 3*w*&Omega;<sub>m</sub><sup>(3*w*+1)/(3*w*)</sup>&Omega;<sub>&Lambda;</sub> &lt; &Omega;<sub>*k*</sub>\[&minus;(3*w*+1)&Omega;<sub>&Lambda;</sub>\]<sup>(3*w*+1)/(3*w*)</sup> .
 
-The integration for the *z* to *r* conversion is performed using the [*Legendre-Gauss* Quadrature](https://mathworld.wolfram.com/Legendre-GaussQuadrature.html) algorithm. The program uniformly samples 128 (customisable in [define.h](define.h#L94)) redshift values in the redshift range of the input catalogues, and checks the maximum order needed for the desired integration precision. This order is then used for the coordinate conversion of all the input objects.
+The integration for the *z* to *r* conversion is performed using the [*Legendre-Gauss* Quadrature](https://mathworld.wolfram.com/Legendre-GaussQuadrature.html) algorithm. The program uniformly samples 128 (customisable in [define.h](src/define.h#L94)) redshift values in the redshift range of the input catalogues, and checks the maximum order needed for the desired integration precision. This order is then used for the coordinate conversion of all the input objects.
 
 For non-*w*CDM cosmologies, the program itself cannot convert *z* to *r*, but it is able to interpolate a table of (*z*, *r*) pairs for coordinate conversions, where the unit of the radial comoving distance has to be Mpc/*h*. And the interpolation is performed using a cubic-spline algorithm<sup>[\[3\]](#ref3)</sup>.
 
@@ -211,7 +211,7 @@ By default, an executable `POWSPEC` is created on success.
 
 ## Configuration parameters and command line options
 
-Configuration files and command line options for this program are parsed using the [libcfg](https://github.com/cheng-zhao/libcfg) library. The default name of the configuration file is [`powspec.conf`](powspec.conf), which is customisable in [`define.h`](define.h#L49). Custom configuration files can also be passed to the program using the `-c` or `--conf` command line options.
+Configuration files and command line options for this program are parsed using the [libcfg](https://github.com/cheng-zhao/libcfg) library. The default name of the configuration file is [`powspec.conf`](powspec.conf), which is customisable in [`define.h`](src/define.h#L49). Custom configuration files can also be passed to the program using the `-c` or `--conf` command line options.
 
 A list of the supported command line options can be displaced using the `-h` or `--help` flags, and a template configuration file is printed with the `-t` or `--template` flags. Please consult [libcfg](https://github.com/cheng-zhao/libcfg) for the formats of the configuration files and command line options.
 
