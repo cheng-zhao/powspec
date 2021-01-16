@@ -31,7 +31,7 @@ Return:
 OFILE *output_init(void) {
   OFILE *ofile = malloc(sizeof *ofile);
   if (!ofile) {
-    P_ERR("failed to initialise the interface for file writing.\n");
+    P_ERR("failed to initialise the interface for file writing\n");
     return NULL;
   }
 
@@ -41,7 +41,7 @@ OFILE *output_init(void) {
   ofile->max = POWSPEC_FILE_CHUNK;
   ofile->chunk = calloc(ofile->max, sizeof(char));
   if (!ofile->chunk) {
-    P_ERR("failed to allocate memory for writing file by chunk.\n");
+    P_ERR("failed to allocate memory for writing file by chunk\n");
     free(ofile);
     return NULL;
   }
@@ -60,25 +60,25 @@ Return:
 ******************************************************************************/
 int output_newfile(OFILE *ofile, const char *fname) {
   if (!ofile) {
-    P_ERR("the interface for file writing is not initialised.\n");
+    P_ERR("the interface for file writing is not initialised\n");
     return POWSPEC_ERR_ARG;
   }
   if (!fname || !(*fname)) {
-    P_ERR("invalid output file name.\n");
+    P_ERR("invalid output file name\n");
     return POWSPEC_ERR_ARG;
   }
 
   if (output_flush(ofile)) {
-    P_ERR("failed to flush the buffer to the opened file: `%s'.\n",
+    P_ERR("failed to flush the buffer to the opened file: `%s'\n",
         ofile->fname);
     return POWSPEC_ERR_FILE;
   }
   if (ofile->fp && fclose(ofile->fp))
-    P_WRN("failed to close file: `%s'.\n", ofile->fname);
+    P_WRN("failed to close file: `%s'\n", ofile->fname);
 
   ofile->fname = fname;
   if (!(ofile->fp = fopen(fname, "w"))) {
-    P_ERR("failed to open the file for writing: `%s'.\n", fname);
+    P_ERR("failed to open the file for writing: `%s'\n", fname);
     return POWSPEC_ERR_FILE;
   }
   return 0;
@@ -93,11 +93,11 @@ Arguments:
 void output_destroy(OFILE *ofile) {
   if (!ofile) return;
   if (output_flush(ofile))
-    P_WRN("closing the file with unsaved buffer.\n");
+    P_WRN("closing the file with unsaved buffer\n");
   free(ofile->chunk);
   if (ofile->fp) {
     if (fclose(ofile->fp))
-      P_WRN("failed to close file: `%s'.\n", ofile->fname);
+      P_WRN("failed to close file: `%s'\n", ofile->fname);
   }
   free(ofile);
 }
@@ -112,14 +112,14 @@ Return:
 ******************************************************************************/
 int output_flush(OFILE *ofile) {
   if (!ofile) {
-    P_ERR("the interface for file writing is not initialised.\n");
+    P_ERR("the interface for file writing is not initialised\n");
     return POWSPEC_ERR_ARG;
   }
 
   if (!ofile->size) return 0;
 
   if (fwrite(ofile->chunk, ofile->size * sizeof(char), 1, ofile->fp) != 1) {
-    P_ERR("failed to write to the output file: `%s'.\n", ofile->fname);
+    P_ERR("failed to write to the output file: `%s'\n", ofile->fname);
     return POWSPEC_ERR_FILE;
   }
 
@@ -139,15 +139,15 @@ Return:
 ******************************************************************************/
 int output_writeline(OFILE *ofile, const char *restrict format, ...) {
   if (!ofile) {
-    P_ERR("the interface for file writing is not initialised.\n");
+    P_ERR("the interface for file writing is not initialised\n");
     return POWSPEC_ERR_ARG;
   }
   if (!ofile->fp) {
-    P_ERR("no opened file for writing the line.\n");
+    P_ERR("no opened file for writing the line\n");
     return POWSPEC_ERR_FILE;
   }
   if (!format || !(*format)) {
-    P_ERR("the formatter string is not given for writing files.\n");
+    P_ERR("the formatter string is not given for writing files\n");
     return POWSPEC_ERR_ARG;
   }
 
@@ -162,11 +162,11 @@ int output_writeline(OFILE *ofile, const char *restrict format, ...) {
   va_end(args);
 
   if (size < 0) {
-    P_ERR("failed to save the result in format: `%s'.\n", format);
+    P_ERR("failed to save the result in format: `%s'\n", format);
     return POWSPEC_ERR_ASCII;
   }
   if (size >= POWSPEC_MAX_CHUNK) {
-    P_ERR("the line to be saved is too long.\n");
+    P_ERR("the line to be saved is too long\n");
     return POWSPEC_ERR_ASCII;
   }
 
@@ -183,7 +183,7 @@ int output_writeline(OFILE *ofile, const char *restrict format, ...) {
     if (enlarge) {
       char *tmp = realloc(ofile->chunk, ofile->max * sizeof(char));
       if (!tmp) {
-        P_ERR("failed to allocate memory for saving the line.\n");
+        P_ERR("failed to allocate memory for saving the line\n");
         return POWSPEC_ERR_MEMORY;
       }
       ofile->chunk = tmp;
@@ -196,7 +196,7 @@ int output_writeline(OFILE *ofile, const char *restrict format, ...) {
     va_end(args);
 
     if (size >= ofile->max) {
-      P_ERR("failed to detect the size of the line.\n");
+      P_ERR("failed to detect the size of the line\n");
       return POWSPEC_ERR_UNKNOWN;
     }
 

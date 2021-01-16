@@ -14,6 +14,7 @@
 #include "ascii_fmtr.h"
 #include <limits.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
@@ -28,7 +29,7 @@ Arguments:
 static void print_fmtr_error(const char *fmtr, const char *ptr) {
   fprintf(stderr, "%s\n", fmtr);
   if (ptr > fmtr) {
-    for (size_t i = 0; i < ptr - fmtr; i++) fprintf(stderr, " ");
+    for (ptrdiff_t i = 0; i < ptr - fmtr; i++) fprintf(stderr, " ");
     fprintf(stderr, "^\n");
   }
 }
@@ -48,7 +49,7 @@ Return:
 static int arg_insert(asc_arg_t **arg, int *num, const asc_dtype_t dtype,
     const char *fmtr, const int len) {
   if (*num == INT_MAX) {        /* there is no more space for the insertion */
-    P_ERR("the formatter string is too long.\n");
+    P_ERR("the formatter string is too long\n");
     return POWSPEC_ERR_ASCII;
   }
 
@@ -61,7 +62,7 @@ static int arg_insert(asc_arg_t **arg, int *num, const asc_dtype_t dtype,
 
     tmp = realloc(*arg, size * sizeof(asc_arg_t));
     if (!tmp) {
-      P_ERR("failed to allocate memory for parsing the formatter.\n");
+      P_ERR("failed to allocate memory for parsing the formatter\n");
       return POWSPEC_ERR_MEMORY;
     }
     *arg = tmp;
@@ -74,7 +75,7 @@ static int arg_insert(asc_arg_t **arg, int *num, const asc_dtype_t dtype,
   /* Copy the specifier, add "%n", and null terminate it. */
   tmp->fmtr = calloc(len + 3, sizeof(char));
   if (!tmp->fmtr) {
-    P_ERR("failed to allocate memory for parsing the formatter.\n");
+    P_ERR("failed to allocate memory for parsing the formatter\n");
     return POWSPEC_ERR_MEMORY;
   }
   memcpy(tmp->fmtr, fmtr, len);
@@ -111,7 +112,7 @@ Return:
 asc_arg_t *parse_ascii_fmtr(const char *fmtr, int *num, int *rnum) {
   if (!fmtr || !num || !rnum) return NULL;
   if (!(*fmtr)) {
-    P_ERR("empty formatter string.\n");
+    P_ERR("empty formatter string\n");
     return NULL;
   }
   int n, rn;
@@ -345,7 +346,7 @@ asc_arg_t *parse_ascii_fmtr(const char *fmtr, int *num, int *rnum) {
 
   /* Release memory that are not necessary any more. */
   asc_arg_t *tmp = realloc(args, sizeof(asc_arg_t) * n);
-  if (!tmp) P_WRN("failed to reduce the allocated memory.\n");
+  if (!tmp) P_WRN("failed to reduce the allocated memory\n");
   else (args = tmp);
 
   *num = n;

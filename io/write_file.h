@@ -41,8 +41,8 @@ typedef struct {
   const char *fname;    /* name of the output file                    */
   FILE *fp;             /* pointer to the file stream                 */
   char *chunk;          /* buffer for writing file by chunks          */
-  size_t size;          /* number of user characters of the buffer    */
-  size_t max;           /* maximum number of characters of the buffer */
+  int size;             /* number of used characters of the buffer    */
+  int max;              /* maximum number of characters of the buffer */
 } OFILE;
 
 /*============================================================================*\

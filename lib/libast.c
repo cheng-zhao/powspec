@@ -28,9 +28,9 @@
 
 *******************************************************************************/
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stddef.h>
 #include <ctype.h>
 #include <limits.h>
 #include <string.h>
@@ -2457,7 +2457,7 @@ Arguments:
 Return:
   Zero on success; non-zero on error.
 ******************************************************************************/
-int ast_eval_num(ast_t *ast, void *value, const void *var, const size_t size) {
+int ast_eval_num(ast_t *ast, void *value, const void *var, const long size) {
   if (!ast) return AST_ERR_INIT;
   if (AST_IS_ERROR(ast)) return AST_ERRNO(ast);
   if (!ast->ast) return AST_ERRNO(ast) = AST_ERR_NOEXP;
@@ -2508,7 +2508,7 @@ void ast_perror(const ast_t *ast, FILE *fp, const char *msg) {
   if (!ast) {
     if (!msg || *msg == '\0') msg = sep = "";
     else sep = " ";
-    fprintf(fp, "%s%sthe abstract syntax tree is not initialised.\n", msg, sep);
+    fprintf(fp, "%s%sthe abstract syntax tree is not initialised\n", msg, sep);
     return;
   }
 
@@ -2568,7 +2568,7 @@ void ast_perror(const ast_t *ast, FILE *fp, const char *msg) {
   /* Print the specifier of the error location. */
   if (AST_ERRNO(ast) == AST_ERR_TOKEN && ast->exp && err->tpos) {
     fprintf(fp, "\n%s\n", ast->exp);
-    for (size_t i = 0; i < err->tpos - ast->exp; i++) fprintf(fp, " ");
+    for (ptrdiff_t i = 0; i < err->tpos - ast->exp; i++) fprintf(fp, " ");
     fprintf(fp, "^");
   }
   if (AST_ERRNO(ast) == AST_ERR_VAR && err->vidx) {

@@ -84,7 +84,7 @@ Arguments:
 Return:
   Zero on success; non-zero on error.
 ******************************************************************************/
-int read_ascii_data(const char *fname, const long skip, const char comment,
+int read_ascii_data(const char *fname, const size_t skip, const char comment,
     const char *fmtr, char *const *pos, const char *wc, const char *wfkp,
     const char *nz, const char *sel, const bool wt, DATA **data, size_t *num,
     double *sumw, double *I12, double *I22, const int verb);

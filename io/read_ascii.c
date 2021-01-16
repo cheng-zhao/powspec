@@ -45,7 +45,7 @@
 #ifdef OMP
 #define POWSPEC_QUIT(x) {                                               \
   printf(FMT_FAIL);                                                     \
-  P_EXT("failed to read the ASCII file.\n");                            \
+  P_EXT("failed to read the ASCII file\n");                             \
   exit(x);                                                              \
 }
 #endif
@@ -88,7 +88,7 @@ static asc_col_t *ascii_col_init(asc_arg_t *arg, const int num,
   for (int i = 0; i < num; i++) {
     if (arg[i].dtype == ASCII_DTYPE_SKIP) continue;
     if (++j >= rnum) {
-      P_ERR("unknown error for identifying ASCII columns.\n");
+      P_ERR("unknown error for identifying ASCII columns\n");
       free(col);
       return NULL;
     }
@@ -103,7 +103,7 @@ static asc_col_t *ascii_col_init(asc_arg_t *arg, const int num,
       default:          /* data types that are not supported by libast */
         col[j].dtype = AST_DTYPE_NULL;
         P_WRN("unsupported formatter `%s', "
-            "the corresponding column is not used.\n", arg[i].fmtr);
+            "the corresponding column is not used\n", arg[i].fmtr);
         break;
     }
 
@@ -218,7 +218,7 @@ static int ascii_read_line(const char *line, const asc_arg_t *arg,
           col[j].v.sval.len = n;
           break;
         default:
-          P_ERR("unknown data type for column: ${%d}.\n", j + 1);
+          P_ERR("unknown data type for column: ${%d}\n", j + 1);
           *end = line;
           return POWSPEC_ERR_UNKNOWN;
       }
@@ -276,7 +276,7 @@ static inline int ascii_read_sel(ast_t *ast, const asc_col_t *col, bool *res) {
         }
         break;
       default:
-        P_ERR("column ${%ld} not appropriate for selection.\n", idx);
+        P_ERR("column ${%ld} not appropriate for selection\n", idx);
         return POWSPEC_ERR_AST;
     }
   }
@@ -331,7 +331,7 @@ static inline int ascii_read_double(ast_t *ast, const asc_col_t *col,
         }
         break;
       default:
-        P_ERR("column ${%ld} not appropriate for the numerical evaluation.\n",
+        P_ERR("column ${%ld} not appropriate for the numerical evaluation\n",
             idx);
         return POWSPEC_ERR_AST;
     }
@@ -404,7 +404,7 @@ int read_ascii_simple(const char *fname, double **x, double **y, size_t *num,
   char *chunk = NULL;
   size_t csize = 0;
   if (chunk_resize(&chunk, &csize)) {
-    P_ERR("failed to allocate memory for reading the file by chunk.\n");
+    P_ERR("failed to allocate memory for reading the file by chunk\n");
     fclose(fp);
     return POWSPEC_ERR_MEMORY;
   }
@@ -414,7 +414,7 @@ int read_ascii_simple(const char *fname, double **x, double **y, size_t *num,
   double *nx = malloc(max * sizeof(double));
   double *ny = malloc(max * sizeof(double));
   if (!nx || !ny) {
-    P_ERR("failed to allocate memory for the samples.\n");
+    P_ERR("failed to allocate memory for the samples\n");
     fclose(fp); free(chunk);
     if (nx) free(nx);
     if (ny) free(ny);
@@ -450,21 +450,21 @@ int read_ascii_simple(const char *fname, double **x, double **y, size_t *num,
       /* Enlarge the memory for the data if necessary. */
       if (++n >= max) {
         if (SIZE_MAX / 2 < max) {
-          P_ERR("too many samples in the file: `%s'.\n", fname);
+          P_ERR("too many samples in the file: `%s'\n", fname);
           fclose(fp); free(chunk); free(nx); free(ny);
           return POWSPEC_ERR_FILE;
         }
         max <<= 1;
         double *tmp = realloc(nx, sizeof(double) * max);
         if (!tmp) {
-          P_ERR("failed to allocate memory for the samples.\n");
+          P_ERR("failed to allocate memory for the samples\n");
           fclose(fp); free(chunk); free(nx); free(ny);
           return POWSPEC_ERR_MEMORY;
         }
         nx = tmp;
         tmp = realloc(ny, sizeof(double) * max);
         if (!tmp) {
-          P_ERR("failed to allocate memory for the samples.\n");
+          P_ERR("failed to allocate memory for the samples\n");
           fclose(fp); free(chunk); free(nx); free(ny);
           return POWSPEC_ERR_MEMORY;
         }
@@ -478,7 +478,7 @@ int read_ascii_simple(const char *fname, double **x, double **y, size_t *num,
     /* The chunk cannot hold a full line. */
     if (p == chunk) {
       if (chunk_resize(&chunk, &csize)) {
-        P_ERR("failed to allocate memory for reading the file by chunk.\n");
+        P_ERR("failed to allocate memory for reading the file by chunk\n");
         fclose(fp); free(chunk); free(nx); free(ny);
         return POWSPEC_ERR_MEMORY;
       }
@@ -492,13 +492,13 @@ int read_ascii_simple(const char *fname, double **x, double **y, size_t *num,
   }
 
   if (!feof(fp)) {
-    P_ERR("unexpected end of file: `%s'.\n", fname);
+    P_ERR("unexpected end of file: `%s'\n", fname);
     fclose(fp); free(chunk); free(nx); free(ny);
     return POWSPEC_ERR_FILE;
   }
 
   free(chunk);
-  if (fclose(fp)) P_WRN("failed to close file: `%s'.\n", fname);
+  if (fclose(fp)) P_WRN("failed to close file: `%s'\n", fname);
   if (verb) printf("  Number of samples: %zu\n", n);
 
   *x = nx;
@@ -530,7 +530,7 @@ Arguments:
 Return:
   Zero on success; non-zero on error.
 ******************************************************************************/
-int read_ascii_data(const char *fname, const long skip, const char comment,
+int read_ascii_data(const char *fname, const size_t skip, const char comment,
     const char *fmtr, char *const *pos, const char *wc, const char *wfkp,
     const char *nz, const char *sel, const bool sim, DATA **data, size_t *num,
     double *sumw, double *I12, double *I22, const int verb) {
@@ -540,10 +540,10 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
   nc = rnc = 0;
   if (!(arg = parse_ascii_fmtr(fmtr, &nc, &rnc))) return POWSPEC_ERR_ASCII;
   if (!rnc) {
-    P_ERR("no column to be read given the formatter: `%s'.\n", fmtr);
+    P_ERR("no column to be read given the formatter: `%s'\n", fmtr);
     return POWSPEC_ERR_ASCII;
   }
-  if (rnc < 3) P_WRN("reading coordinates from less than 3 columns.\n");
+  if (rnc < 3) P_WRN("reading coordinates from less than 3 columns\n");
 
   /* Record libast compatible columns. */
   asc_col_t *col;
@@ -609,12 +609,12 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
   int max_col = 0;
   for (int i = 0; i < 3; i++) {
     if (ast_pos[i]->nvar == 0) {
-      P_ERR("the expression for position coordinate %d is a constant: `%s'.\n",
+      P_ERR("the expression for position coordinate %d is a constant: `%s'\n",
           i + 1, pos[i]);
       CLEAN_PTR; return POWSPEC_ERR_CFG;
     }
     if (rnc < ast_pos[i]->vidx[ast_pos[i]->nvar - 1]) {
-      P_ERR("not enough columns for position coordinate %d: `%s'.\n",
+      P_ERR("not enough columns for position coordinate %d: `%s'\n",
           i + 1, pos[i]);
       CLEAN_PTR; return POWSPEC_ERR_CFG;
     }
@@ -623,11 +623,11 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
   }
   if (ast_sel) {
     if (ast_sel->nvar == 0) {
-      P_ERR("the expression for data selection is a constant: `%s'.\n", sel);
+      P_ERR("the expression for data selection is a constant: `%s'\n", sel);
       CLEAN_PTR; return POWSPEC_ERR_CFG;
     }
     if (rnc < ast_sel->vidx[ast_sel->nvar - 1]) {
-      P_ERR("not enough columns for data selection: `%s'.\n", sel);
+      P_ERR("not enough columns for data selection: `%s'\n", sel);
       CLEAN_PTR; return POWSPEC_ERR_CFG;
     }
     if (max_col < ast_sel->vidx[ast_sel->nvar - 1])
@@ -635,7 +635,7 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
   }
   if (ast_wc) {
     if (ast_wc->nvar && rnc < ast_wc->vidx[ast_wc->nvar - 1]) {
-      P_ERR("not enough columns for completeness weight: `%s'.\n", wc);
+      P_ERR("not enough columns for completeness weight: `%s'\n", wc);
       CLEAN_PTR; return POWSPEC_ERR_CFG;
     }
     if (ast_wc->nvar && max_col < ast_wc->vidx[ast_wc->nvar - 1])
@@ -643,7 +643,7 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
   }
   if (ast_wfkp) {
     if (ast_wfkp->nvar && rnc < ast_wfkp->vidx[ast_wfkp->nvar - 1]) {
-      P_ERR("not enough columns for FKP weight: `%s'.\n", wfkp);
+      P_ERR("not enough columns for FKP weight: `%s'\n", wfkp);
       CLEAN_PTR; return POWSPEC_ERR_CFG;
     }
     if (ast_wfkp->nvar && max_col < ast_wfkp->vidx[ast_wfkp->nvar - 1])
@@ -651,7 +651,7 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
   }
   if (ast_nz) {
     if (ast_nz->nvar && rnc < ast_nz->vidx[ast_nz->nvar - 1]) {
-      P_ERR("not enough columns for radial number density: `%s'.\n", nz);
+      P_ERR("not enough columns for radial number density: `%s'\n", nz);
       CLEAN_PTR; return POWSPEC_ERR_CFG;
     }
     if (ast_nz->nvar && max_col < ast_nz->vidx[ast_nz->nvar - 1])
@@ -673,14 +673,14 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
   /* Prepare for the chunk. */
   size_t csize = 0;
   if (chunk_resize(&chunk, &csize)) {
-    P_ERR("failed to allocate memory for reading the file by chunk.\n");
+    P_ERR("failed to allocate memory for reading the file by chunk\n");
     CLEAN_PTR; return POWSPEC_ERR_MEMORY;
   }
 
   /* Allocate memory for the data. */
   size_t max = POWSPEC_DATA_INIT_NUM;
   if (!(dat = malloc(max * sizeof(DATA)))) {
-    P_ERR("failed to allocate memory for the data.\n");
+    P_ERR("failed to allocate memory for the data\n");
     CLEAN_PTR; return POWSPEC_ERR_MEMORY;
   }
 
@@ -691,12 +691,7 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
   asc_col_t **pcol = NULL;
   if (nomp > 1) {
     if (!(pcol = malloc(sizeof(asc_col_t *) * (nomp - 1)))) {
-      P_ERR("failed to allocate memory for thread-private columns.\n");
-      POWSPEC_QUIT(POWSPEC_ERR_MEMORY);
-    }
-    for (int j = 0; j < nomp - 1; j++) {
-      if (!(pcol[j] = malloc(sizeof(asc_col_t) * rnc))) {
-        P_ERR("failed to allocate memory for thread-private columns.\n");
+      P_ERR("failed to allocate memory for thread-private columns\n");
         POWSPEC_QUIT(POWSPEC_ERR_MEMORY);
       }
       memcpy(pcol[j], col, sizeof(asc_col_t) * rnc);
@@ -712,7 +707,7 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
     ast_pwfkp = malloc(sizeof(ast_t *) * (nomp - 1));
     ast_pnz = malloc(sizeof(ast_t *) * (nomp - 1));
     if (!ast_ppos || !ast_psel || !ast_pwc || !ast_pwfkp || !ast_pnz) {
-      P_ERR("failed to allocate memory for thread-private ASTs.\n");
+      P_ERR("failed to allocate memory for thread-private ASTs\n");
       POWSPEC_QUIT(POWSPEC_ERR_MEMORY);
     }
     for (int j = 0; j < nomp - 1; j++) {
@@ -766,7 +761,7 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
         }
         else ast_pnz[j] = NULL;
       }
-      else ast_pwc[j] = ast_pwfkp[j] = ast_pnz[j] = NULL;
+      else ast_pwfkp[j] = ast_pnz[j] = NULL;
     }
   }
   /* Construct the private data pool. */
@@ -776,12 +771,12 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
   double *psumw2 = calloc(nomp, sizeof(double));
   double *psumw2n = calloc(nomp, sizeof(double));
   if (!pdata || !pndata || !psumw || !psumw2 || !psumw2n) {
-    P_ERR("failed to allocate memory for the thread-private data.\n");
+    P_ERR("failed to allocate memory for the thread-private data\n");
     POWSPEC_QUIT(POWSPEC_ERR_MEMORY);
   }
   for (int j = 0; j < nomp; j++) {
     if (!(pdata[j] = malloc(sizeof(DATA) * POWSPEC_DATA_THREAD_NUM))) {
-      P_ERR("failed to allocate memory for the thread-private data.\n");
+      P_ERR("failed to allocate memory for the thread-private data\n");
       POWSPEC_QUIT(POWSPEC_ERR_MEMORY);
     }
   }
@@ -790,7 +785,7 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
   size_t nl = 0;
   char **lines = malloc(sizeof(char *) * nlmax);
   if (!lines) {
-    P_ERR("failed to allocate memory for the thread-private lines.\n");
+    P_ERR("failed to allocate memory for the thread-private lines\n");
     POWSPEC_QUIT(POWSPEC_ERR_MEMORY);
   }
 #endif
@@ -822,7 +817,7 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
       }
       *endl = '\0';             /* replace '\n' by string terminator '\0' */
       while (isspace(*p)) ++p;          /* omit leading whitespaces */
-      if (*p == POWSPEC_READ_COMMENT || *p == '\0') {   /* comment or empty */
+      if (*p == comment || *p == '\0') {        /* comment or empty */
         p = endl + 1; continue;
       }
 
@@ -832,13 +827,13 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
       /* Enlarge the pool if necessary. */
       if (nl >= nlmax) {
         if (SIZE_MAX / 2 < nlmax) {
-          P_ERR("too many lines in the file.\n");
+          P_ERR("too many lines in the file\n");
           POWSPEC_QUIT(POWSPEC_ERR_FILE);
         }
         nlmax <<= 1;
         char **tmp = realloc(lines, sizeof(char *) * nlmax);
         if (!tmp) {
-          P_ERR("failed to allocate memory for the thread-private lines.\n");
+          P_ERR("failed to allocate memory for the thread-private lines\n");
           POWSPEC_QUIT(POWSPEC_ERR_MEMORY);
         }
         lines = tmp;
@@ -905,14 +900,14 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
       /* Enlarge the memory for the data if necessary. */
       if (++n >= max) {
         if (SIZE_MAX / 2 < max) {
-          P_ERR("too many objects in the file: `%s'.\n", fname);
+          P_ERR("too many objects in the file: `%s'\n", fname);
           CLEAN_PTR;
           return POWSPEC_ERR_FILE;
         }
         max <<= 1;
         DATA *tmp = realloc(dat, sizeof(DATA) * max);
         if (!tmp) {
-          P_ERR("failed to allocate memory for the data.\n");
+          P_ERR("failed to allocate memory for the data\n");
           CLEAN_PTR;
           return POWSPEC_ERR_MEMORY;
         }
@@ -926,7 +921,7 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
     /* The chunk cannot hold a full line. */
     if (p == chunk) {
       if (chunk_resize(&chunk, &csize)) {
-        P_ERR("failed to allocate memory for reading the file by chunk.\n");
+        P_ERR("failed to allocate memory for reading the file by chunk\n");
         CLEAN_PTR;
         return POWSPEC_ERR_MEMORY;
       }
@@ -1022,14 +1017,14 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
             /* Enlarge the memory for the data if necessary. */
             if (n + POWSPEC_DATA_THREAD_NUM >= max) {
               if (SIZE_MAX / 2 < max) {
-                P_ERR("too many objects in the file: `%s'.\n", fname);
+                P_ERR("too many objects in the file: `%s'\n", fname);
                 POWSPEC_QUIT(POWSPEC_ERR_AST);
               }
               max <<= 1;
               if (max < POWSPEC_DATA_THREAD_NUM) max = POWSPEC_DATA_THREAD_NUM;
               DATA *tmp = realloc(dat, sizeof(DATA) * max);
               if (!tmp) {
-                P_ERR("failed to allocate memory for the data.\n");
+                P_ERR("failed to allocate memory for the data\n");
                 POWSPEC_QUIT(POWSPEC_ERR_AST);
               }
               dat = tmp;
@@ -1057,13 +1052,13 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
       /* Enlarge the memory for the data if necessary. */
       if (n + pndata[i] >= max) {
         if (SIZE_MAX / 2 < max) {
-          P_ERR("too many objects in the file: `%s'.\n", fname);
+          P_ERR("too many objects in the file: `%s'\n", fname);
           POWSPEC_QUIT(POWSPEC_ERR_AST);
         }
         max <<= 1;
         DATA *tmp = realloc(dat, sizeof(DATA) * max);
         if (!tmp) {
-          P_ERR("failed to allocate memory for the data.\n");
+          P_ERR("failed to allocate memory for the data\n");
           POWSPEC_QUIT(POWSPEC_ERR_AST);
         }
         dat = tmp;
@@ -1093,7 +1088,7 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
 #endif
 
   if (!feof(fp)) {
-    P_ERR("unexpected end of file: `%s'.\n", fname);
+    P_ERR("unexpected end of file: `%s'\n", fname);
     CLEAN_PTR; return POWSPEC_ERR_FILE;
   }
 
@@ -1102,7 +1097,7 @@ int read_ascii_data(const char *fname, const long skip, const char comment,
         "  Number of recorded objects: %zu\n", nline, n);
   }
 
-  if (fclose(fp)) P_WRN("failed to close file: `%s'.\n", fname);
+  if (fclose(fp)) P_WRN("failed to close file: `%s'\n", fname);
   ast_destroy(ast_pos[0]); ast_destroy(ast_pos[1]); ast_destroy(ast_pos[2]);
   ast_destroy(ast_sel); ast_destroy(ast_wc); ast_destroy(ast_wfkp);
   ast_destroy(ast_nz);

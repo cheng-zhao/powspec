@@ -1,10 +1,10 @@
 CC = gcc
 CFLAGS = -std=c99 -O3 -Wall
 LIBS = -lm -lfftw3
-INCL = -I. -Iio -Ilib -Imath
+INCL = -Isrc -Iio -Ilib -Imath
 
 # Settings for FFTW
-FFTW_DIR = 
+FFTW_DIR = /Users/czhao/lib/fftw-3.3.8
 ifneq ($(FFTW_DIR),)
   LIBS += -L$(FFTW_DIR)/lib
   INCL += -I$(FFTW_DIR)/include
@@ -18,7 +18,7 @@ LIBS += -DOMP -fopenmp -lfftw3_omp
 
 # Settings for CFITSIO (not implemented yet)
 
-SRCS = $(wildcard *.c lib/*.c io/*.c math/*.c)
+SRCS = $(wildcard src/*.c lib/*.c io/*.c math/*.c)
 EXEC = POWSPEC
 
 all:
