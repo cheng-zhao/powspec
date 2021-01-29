@@ -779,12 +779,12 @@ int read_ascii_data(const char *fname, const size_t skip, const char comment,
     P_ERR("failed to allocate memory for the thread-private data\n");
     POWSPEC_QUIT(POWSPEC_ERR_MEMORY);
   }
-  for (int j = 0; j < nomp; j++) {
-    if (!(pdata[j] = malloc(sizeof(DATA) * POWSPEC_DATA_THREAD_NUM))) {
-      P_ERR("failed to allocate memory for the thread-private data\n");
-      POWSPEC_QUIT(POWSPEC_ERR_MEMORY);
-    }
+  if (!(pdata[0] = malloc(sizeof(DATA) * nomp * POWSPEC_DATA_THREAD_NUM))) {
+    P_ERR("failed to allocate memory for the thread-private data\n");
+    POWSPEC_QUIT(POWSPEC_ERR_MEMORY);
   }
+  for (int j = 0; j < nomp; j++)
+    pdata[j] = pdata[0] + j * POWSPEC_DATA_THREAD_NUM;
   /* Construct the pool for file lines. */
   size_t nlmax = POWSPEC_DATA_INIT_NUM;
   size_t nl = 0;
@@ -935,6 +935,25 @@ int read_ascii_data(const char *fname, const size_t skip, const char comment,
     }
 
 #ifdef OMP
+    /* Enlarge the memory for the data if necessary. */
+    if (nl + n > max) {
+      while (nl + n > max) {
+        if (SIZE_MAX / 2 < max) {
+          P_ERR("too many objects in the file: `%s'.\n", fname);
+          CLEAN_PTR;
+          return POWSPEC_ERR_FILE;
+        }
+        max <<= 1;
+      }
+      DATA *tmp = realloc(dat, sizeof(DATA) * max);
+      if (!tmp) {
+        P_ERR("failed to allocate memory for the data.\n");
+        CLEAN_PTR;
+        return POWSPEC_ERR_MEMORY;
+      }
+      dat = tmp;
+    }
+
 #pragma omp parallel num_threads(nomp) \
     firstprivate(ast_pos, ast_sel, ast_wc, ast_wfkp, ast_nz, col)
     {
@@ -950,6 +969,8 @@ int read_ascii_data(const char *fname, const size_t skip, const char comment,
         ast_nz = ast_pnz[tid - 1];
         col = pcol[tid - 1];
       }
+      DATA *pdat = pdata[tid];
+      size_t *pnum = pndata + tid;
       /* Process lines in parallel. */
 #pragma omp for
       for (size_t ii = 0; ii < nl; ii++) {
@@ -979,8 +1000,7 @@ int read_ascii_data(const char *fname, const size_t skip, const char comment,
 
         /* Record coordinates to the private data pool. */
         for (int i = 0; i < 3; i++) {
-          if (ascii_read_double(ast_pos[i], col,
-                &(pdata[tid][pndata[tid]].x[i]))) {
+          if (ascii_read_double(ast_pos[i], col, &(pdat[*pnum].x[i]))) {
             POWSPEC_QUIT(POWSPEC_ERR_AST);
           }
         }
@@ -1008,15 +1028,15 @@ int read_ascii_data(const char *fname, const size_t skip, const char comment,
           }
           else tnz = 0;
 
-          pdata[tid][pndata[tid]].w = twc * twfkp;
+          pdat[*pnum].w = twc * twfkp;
           psumw[tid] += twc;
-          psumw2[tid] += pdata[tid][pndata[tid]].w * pdata[tid][pndata[tid]].w;
+          psumw2[tid] += pdat[*pnum].w * pdat[*pnum].w;
           psumw2n[tid] += twc * twfkp * twfkp * tnz;
         }
-        else psumw[tid] += (pdata[tid][pndata[tid]].w = twc);
+        else psumw[tid] += (pdat[*pnum].w = twc);
 
         /* Record the private data and clear the pool if necessary. */
-        if (++pndata[tid] >= POWSPEC_DATA_THREAD_NUM) {
+        if (++(*pnum) >= POWSPEC_DATA_THREAD_NUM) {
 #pragma omp critical
           {
             /* Enlarge the memory for the data if necessary. */
@@ -1026,7 +1046,8 @@ int read_ascii_data(const char *fname, const size_t skip, const char comment,
                 POWSPEC_QUIT(POWSPEC_ERR_AST);
               }
               max <<= 1;
-              if (max < POWSPEC_DATA_THREAD_NUM) max = POWSPEC_DATA_THREAD_NUM;
+              if (max < n + POWSPEC_DATA_THREAD_NUM)
+                max = n + POWSPEC_DATA_THREAD_NUM;
               DATA *tmp = realloc(dat, sizeof(DATA) * max);
               if (!tmp) {
                 P_ERR("failed to allocate memory for the data\n");
@@ -1034,8 +1055,7 @@ int read_ascii_data(const char *fname, const size_t skip, const char comment,
               }
               dat = tmp;
             }
-            memcpy(dat + n, pdata[tid],
-                sizeof(DATA) * POWSPEC_DATA_THREAD_NUM);
+            memcpy(dat + n, pdat, sizeof(DATA) * POWSPEC_DATA_THREAD_NUM);
             n += POWSPEC_DATA_THREAD_NUM;
           }
           pndata[tid] = 0;
@@ -1061,6 +1081,7 @@ int read_ascii_data(const char *fname, const size_t skip, const char comment,
           POWSPEC_QUIT(POWSPEC_ERR_AST);
         }
         max <<= 1;
+        if (max < n + pndata[i]) max = n + pndata[i];
         DATA *tmp = realloc(dat, sizeof(DATA) * max);
         if (!tmp) {
           P_ERR("failed to allocate memory for the data\n");
@@ -1084,11 +1105,11 @@ int read_ascii_data(const char *fname, const size_t skip, const char comment,
     if (ast_pwfkp[i]) ast_destroy(ast_pwfkp[i]);
     if (ast_pnz[i]) ast_destroy(ast_pnz[i]);
   }
-  for (int i = 0; i < nomp; i++) free(pdata[i]);
+  free(pdata[0]); free(pdata); free(pndata);
   for (int i = 0; i < (nomp - 1) * 3; i++) ast_destroy(ast_ppos[i]);
   free(pcol); free(ast_ppos); free(ast_psel);
   free(ast_pwc); free(ast_pwfkp); free(ast_pnz);
-  free(pdata); free(pndata); free(psumw); free(psumw2); free(psumw2n);
+  free(psumw); free(psumw2); free(psumw2n);
   free(lines);
 #endif
 
