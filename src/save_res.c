@@ -135,6 +135,7 @@ int save_res(const CONF *conf, const CATA *cat, const MESH *mesh,
 
   if (!conf->iscross) {
     output_destroy(ofile);
+    printf(FMT_DONE);
     return 0;
   }
 
