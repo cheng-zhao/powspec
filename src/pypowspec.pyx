@@ -31,7 +31,7 @@ cdef extern from "read_cata.h":
 # powspec.h
 cdef extern from "powspec.h":
 
-    PK *compute_pk(CATA* cata, int argc, char* argv[]) nogil;
+    PK *compute_pk(CATA* cata, bint save_out, int argc, char* argv[]) nogil;
 
 # multipole.h
 
@@ -80,8 +80,6 @@ cdef CATA* numpy_to_cata_auto(double[:,:] positions_a,) nogil:
             cat.data[i][j].x[2] = positions_a[j,2]
             cat.data[i][j].w = positions_a[j,3]
             cat.wdata[i] += cat.data[i][j].w
-
-    printf("%lf %lf %lf %lf\n", cat.data[0][100].x[0], cat.data[0][100].x[1], cat.data[0][100].x[2], cat.data[0][100].w)
     
     return cat
 
@@ -89,11 +87,17 @@ cdef CATA* numpy_to_cata_auto(double[:,:] positions_a,) nogil:
 def compute_auto_powspec(double[:] data_x, #Assumes double precision input/FFTW!
                         double[:] data_y, 
                         double[:] data_z, 
-                        double[:] data_w,):
+                        double[:] data_w,
+                        powspec_conf_file = "powspec.conf",
+                        output_file = None):
 
 
-    # Define dummy names for IO so conf does not crash
-    test_output = "--auto=test/test.out"
+    save_out = output_file is not None
+    if not save_out:
+        # Define dummy names for IO so conf does not crash
+        test_output = "--auto=test/test.out"
+    else:
+        test_output = f"--auto={output_file}"
     test_output_bytes = test_output.encode('utf-8') + b'\x00'
     cdef char* test_output_string = test_output_bytes
 
@@ -102,7 +106,7 @@ def compute_auto_powspec(double[:] data_x, #Assumes double precision input/FFTW!
     #       from options passed to function. See i.e. 
     #       https://github.com/dforero0896/fcfcwrap
     # TODO: (Alternative/harder) override CONF structure
-    conf = "--conf=powspec.conf"
+    conf = f"--conf={powspec_conf_file}"
     conf_bytes = conf.encode('utf-8') + b'\x00'
     cdef char* conf_string = conf_bytes
 
@@ -116,21 +120,37 @@ def compute_auto_powspec(double[:] data_x, #Assumes double precision input/FFTW!
     # Create CATA structure (involves data copying)
     cat = numpy_to_cata_auto(np.c_[data_x, data_y, data_z, data_w])
 
-    cdef PK* pk = compute_pk(cat, argc, argv)
-    pk_result_npy = np.empty((pk.nbin, 4), dtype = np.double)
+    cdef PK* pk = compute_pk(cat, <bint> save_out, argc, argv)
+    pk_result = {}
+    pk_result['n_data_objects'] = cat.ndata[0]
+    pk_result['w_data_objects'] = cat.wdata[0]
+    pk_result['shot_noise'] = cat.shot[0]
+    pk_result['normalisation'] = cat.norm[0]
+    pk_result['k'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['kmin'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['kmax'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['kavg'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['nmodes'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['multipoles'] = np.empty((pk.nbin, pk.nl), dtype = np.double) 
+    
+
 
     # Loop assumes computing l=0,2,4
-    # TODO: Make it equivariant to configuration.
+    
     for i in range(pk.nbin):
-        pk_result_npy[i,0] = pk.k[i]
-        pk_result_npy[i,1] = pk.pl[0][0][i]
-        pk_result_npy[i,2] = pk.pl[0][1][i]
-        pk_result_npy[i,3] = pk.pl[0][2][i]
+        pk_result['k'][i] = pk.k[i]
+        pk_result['kavg'][i] = pk.km[i]
+        pk_result['kmin'][i] = pk.kedge[i]
+        pk_result['kmax'][i] = pk.kedge[i+1]
+        pk_result['nmodes'][i] = pk.cnt[i]
+        for j in range(pk.nl):
+            pk_result['multipoles'][i,j] = pk.pl[0][j][i]
+        
         #printf("%lf %lf %lf %lf\n", pk.k[i], pk.pl[0][0][i], pk.pl[0][1][i], pk.pl[0][2][i])
 
     cata_destroy(cat)
     powspec_destroy(pk)
     
-    return pk_result_npy
+    return pk_result
 
 

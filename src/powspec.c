@@ -20,11 +20,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-PK *compute_pk(CATA *cata, int argc, char *argv[]) {
-  printf("The following arguments were passed to main():\n");
-  printf("argnum \t value \n");
-  for (int i = 0; i<argc; i++) printf("%d \t %s \n", i, argv[i]);
-  printf("\n");
+PK *compute_pk(CATA *cata, bool save_out, int argc, char *argv[]) {
+  //printf("The following arguments were passed to main():\n");
+  //printf("argnum \t value \n");
+  //for (int i = 0; i<argc; i++) printf("%d \t %s \n", i, argv[i]);
+  //printf("\n");
 
   CONF *conf;
   if (!(conf = load_conf(argc, argv))) {
@@ -64,13 +64,13 @@ PK *compute_pk(CATA *cata, int argc, char *argv[]) {
     return NULL;
   }
 
-  // if (save_res(conf, cata, mesh, pk)) {
-  //   printf(FMT_FAIL);
-  //   P_EXT("failed to write the output to file.\n");
-  //   conf_destroy(conf);
-  //   mesh_destroy(mesh); powspec_destroy(pk);
-  //   return POWSPEC_ERR_SAVE;
-  // }
+   if (save_out && save_res(conf, cata, mesh, pk)) {
+     printf(FMT_FAIL);
+     P_EXT("failed to write the output to file.\n");
+     conf_destroy(conf);
+     mesh_destroy(mesh); powspec_destroy(pk);
+     return POWSPEC_ERR_SAVE;
+   }
 
   conf_destroy(conf);
   mesh_destroy(mesh);
