@@ -6,6 +6,6 @@
 #include "multipole.h"
 
 void free_pk_array(double *pk_array);
-double *compute_pk(CATA *cata, int *nkbin, int argc, char *argv[]);
+PK *compute_pk(CATA *cata, int argc, char *argv[]);
 
 #endif

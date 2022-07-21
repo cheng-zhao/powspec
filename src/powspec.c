@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-PK *compute_pk(CATA *cata, int *nkbin, int argc, char *argv[]) {
+PK *compute_pk(CATA *cata, int argc, char *argv[]) {
   printf("The following arguments were passed to main():\n");
   printf("argnum \t value \n");
   for (int i = 0; i<argc; i++) printf("%d \t %s \n", i, argv[i]);
@@ -78,18 +78,4 @@ PK *compute_pk(CATA *cata, int *nkbin, int argc, char *argv[]) {
   return pk;
   
 }
- // *nkbin = pk->nbin;
- // int nbin = pk->nbin;//
-
- // double *pk_array = calloc(4 * nbin, sizeof(size_t));
- // 
- // for (int i = 0; i < nbin; i++) {
- //     pk_array[i] = pk->k[i];
- //     pk_array[nbin + i] = pk->pl[0][0][i];
- //     pk_array[2 * nbin + i] = pk->pl[0][1][i];
- //     pk_array[3 * nbin + i] = pk->pl[0][2][i];     
- // }//
-
- // powspec_destroy(pk);
- // return pk_array;
-//}
+ 

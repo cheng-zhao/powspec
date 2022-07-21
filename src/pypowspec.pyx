@@ -31,7 +31,7 @@ cdef extern from "read_cata.h":
 # powspec.h
 cdef extern from "powspec.h":
 
-    PK *compute_pk(CATA* cata, int* nkbin, int argc, char* argv[]) nogil;
+    PK *compute_pk(CATA* cata, int argc, char* argv[]) nogil;
 
 # multipole.h
 
@@ -86,37 +86,41 @@ cdef CATA* numpy_to_cata_auto(double[:,:] positions_a,) nogil:
     return cat
 
     
+def compute_auto_powspec(double[:] data_x, #Assumes double precision input/FFTW!
+                        double[:] data_y, 
+                        double[:] data_z, 
+                        double[:] data_w,):
 
 
-def test():
-
-    seed = 42
-    np.random.seed(seed)
-    nobj = int(1e4)
-    data = 1000. * np.random.random((nobj, 3)).astype(np.double)
-    w = np.ones(nobj)
-    
+    # Define dummy names for IO so conf does not crash
     test_output = "--auto=test/test.out"
     test_output_bytes = test_output.encode('utf-8') + b'\x00'
     cdef char* test_output_string = test_output_bytes
 
+    # Define name of the configuration file to use
+    # TODO: Generate temporary configuration file at fixed location
+    #       from options passed to function. See i.e. 
+    #       https://github.com/dforero0896/fcfcwrap
+    # TODO: (Alternative/harder) override CONF structure
     conf = "--conf=powspec.conf"
     conf_bytes = conf.encode('utf-8') + b'\x00'
     cdef char* conf_string = conf_bytes
 
+    # Define dummy argc, argv to send to powspec main function
+    # This should remain similar once we generate a conf file.
     cdef int argc = 2
     cdef char* argv[2]
     argv[0] = conf_string
     argv[1] = test_output_string
-    
-    cat = numpy_to_cata_auto(np.c_[data, w])
 
-    cdef int nkbin = 10000
-    cdef PK* pk = compute_pk(cat, &nkbin, argc, argv)
+    # Create CATA structure (involves data copying)
+    cat = numpy_to_cata_auto(np.c_[data_x, data_y, data_z, data_w])
 
+    cdef PK* pk = compute_pk(cat, argc, argv)
     pk_result_npy = np.empty((pk.nbin, 4), dtype = np.double)
 
-
+    # Loop assumes computing l=0,2,4
+    # TODO: Make it equivariant to configuration.
     for i in range(pk.nbin):
         pk_result_npy[i,0] = pk.k[i]
         pk_result_npy[i,1] = pk.pl[0][0][i]
@@ -126,7 +130,7 @@ def test():
 
     cata_destroy(cat)
     powspec_destroy(pk)
-    print(pk_result_npy)
+    
     return pk_result_npy
 
 
