@@ -27,7 +27,7 @@ Arguments:
 Return:
   Address of the structure.
 ******************************************************************************/
-static CATA *cata_init(const int ndata) {
+CATA *cata_init(const int ndata) {
   if (ndata < 0) return NULL;
   CATA *cat = malloc(sizeof *cat);
   if (!cat) return NULL;

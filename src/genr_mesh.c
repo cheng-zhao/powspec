@@ -516,7 +516,7 @@ static int def_box(const CATA *cat, const bool issim, const double *bsize,
 
   for (int i = 0; i < 3; i++) {
     if (min[i] > max[i]) {
-      P_ERR("invalid %c coordinate value in the catalogs\n", c[i]);
+      P_ERR("invalid %c coordinate value %lf %lf in the catalogs\n", c[i], min[i], max[i]);
       return POWSPEC_ERR_CATA;
     }
     /* Verify coordinates of the simulation box. */
@@ -906,6 +906,7 @@ MESH *genr_mesh(const CONF *conf, CATA *cat) {
       double vol = mesh->bsize[0] * mesh->bsize[1] * mesh->bsize[2];
       cat->shot[i] = vol / cat->wdata[i];
       cat->norm[i] = cat->wdata[i] * cat->wdata[i] / vol;
+      //printf("%lf %lf %lf %lf", cat->shot[i], cat->norm[i], cat->num, cat->wdata[i]);
     }
   }
 

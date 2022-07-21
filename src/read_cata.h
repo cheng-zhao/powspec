@@ -81,4 +81,7 @@ Arguments:
 ******************************************************************************/
 void cata_destroy(CATA *cat);
 
+
+CATA *cata_init(const int ndata);
+
 #endif

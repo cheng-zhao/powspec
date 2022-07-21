@@ -20,27 +20,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char *argv[]) {
+PK *compute_pk(CATA *cata, int *nkbin, int argc, char *argv[]) {
+  printf("The following arguments were passed to main():\n");
+  printf("argnum \t value \n");
+  for (int i = 0; i<argc; i++) printf("%d \t %s \n", i, argv[i]);
+  printf("\n");
+
   CONF *conf;
   if (!(conf = load_conf(argc, argv))) {
     printf(FMT_FAIL);
     P_EXT("failed to load configuration parameters\n");
-    return POWSPEC_ERR_CONF;
+    return NULL;
   }
 
-  CATA *cata;
-  if (!(cata = read_cata(conf))) {
-    printf(FMT_FAIL);
-    P_EXT("failed to read the catalogs\n");
-    conf_destroy(conf);
-    return POWSPEC_ERR_CATA;
-  }
+  // CATA *cata;
+  // if (!(cata = read_cata(conf))) {
+  //   printf(FMT_FAIL);
+  //   P_EXT("failed to read the catalogs.\n");
+  //   conf_destroy(conf);
+  //   return POWSPEC_ERR_CATA;
+  // }
 
   if (cnvt_coord(conf, cata)) {
     printf(FMT_FAIL);
     P_EXT("failed to convert coordinates\n");
     conf_destroy(conf); cata_destroy(cata);
-    return POWSPEC_ERR_CNVT;
+    return NULL;
   }
 
   MESH *mesh;
@@ -48,7 +53,7 @@ int main(int argc, char *argv[]) {
     printf(FMT_FAIL);
     P_EXT("failed to generate the density fields\n");
     conf_destroy(conf); cata_destroy(cata);
-    return POWSPEC_ERR_MESH;
+    return NULL;
   }
 
   PK *pk;
@@ -56,21 +61,35 @@ int main(int argc, char *argv[]) {
     printf(FMT_FAIL);
     P_EXT("failed to compute the power spectra\n");
     conf_destroy(conf); cata_destroy(cata); mesh_destroy(mesh);
-    return POWSPEC_ERR_PK;
+    return NULL;
   }
 
-  if (save_res(conf, cata, mesh, pk)) {
-    printf(FMT_FAIL);
-    P_EXT("failed to write the output to file\n");
-    conf_destroy(conf); cata_destroy(cata);
-    mesh_destroy(mesh); powspec_destroy(pk);
-    return POWSPEC_ERR_SAVE;
-  }
+  // if (save_res(conf, cata, mesh, pk)) {
+  //   printf(FMT_FAIL);
+  //   P_EXT("failed to write the output to file.\n");
+  //   conf_destroy(conf);
+  //   mesh_destroy(mesh); powspec_destroy(pk);
+  //   return POWSPEC_ERR_SAVE;
+  // }
 
   conf_destroy(conf);
-  cata_destroy(cata);
   mesh_destroy(mesh);
-  powspec_destroy(pk);
-  return 0;
+  
+  return pk;
+  
 }
+ // *nkbin = pk->nbin;
+ // int nbin = pk->nbin;//
 
+ // double *pk_array = calloc(4 * nbin, sizeof(size_t));
+ // 
+ // for (int i = 0; i < nbin; i++) {
+ //     pk_array[i] = pk->k[i];
+ //     pk_array[nbin + i] = pk->pl[0][0][i];
+ //     pk_array[2 * nbin + i] = pk->pl[0][1][i];
+ //     pk_array[3 * nbin + i] = pk->pl[0][2][i];     
+ // }//
+
+ // powspec_destroy(pk);
+ // return pk_array;
+//}
