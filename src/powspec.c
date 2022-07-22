@@ -21,10 +21,10 @@
 #include <stdlib.h>
 
 PK *compute_pk(CATA *cata, bool save_out, int argc, char *argv[]) {
-  printf("The following arguments were passed to main():\n");
-  printf("argnum \t value \n");
-  for (int i = 0; i<argc; i++) printf("%d \t %s \n", i, argv[i]);
-  printf("\n");
+  //printf("The following arguments were passed to main():\n");
+  //printf("argnum \t value \n");
+  //for (int i = 0; i<argc; i++) printf("%d \t %s \n", i, argv[i]);
+  //printf("\n");
 
   CONF *conf;
   if (!(conf = load_conf(argc, argv))) {
@@ -57,6 +57,15 @@ PK *compute_pk(CATA *cata, bool save_out, int argc, char *argv[]) {
     conf_destroy(conf); cata_destroy(cata); mesh_destroy(mesh);
     return NULL;
   }
+
+  for (int i = 0; i < pk->nbin;i++){
+    for (int k = 0; k < cata->num; k++){
+      printf("%lf ", pk->pl[k][0][i]);
+    }
+    printf("\n");
+    
+  }
+
 
    if (save_out && save_res(conf, cata, mesh, pk)) {
      printf(FMT_FAIL);

@@ -428,14 +428,13 @@ static cfg_t *conf_read(CONF *conf, const int argc, char *const *argv) {
   if (cfg_read_opts(cfg, argc, argv, POWSPEC_PRIOR_CMD, &optidx))
     P_CFG_ERR(cfg);
   P_CFG_WRN(cfg);
-
+  
   /* Read parameters from configuration file. */
   if (!cfg_is_set(cfg, &conf->fconf)) conf->fconf = DEFAULT_CONF_FILE;
   if (access(conf->fconf, R_OK))
     P_WRN("cannot access the configuration file: `%s'\n", conf->fconf);
   else if (cfg_read_file(cfg, conf->fconf, POWSPEC_PRIOR_FILE)) P_CFG_ERR(cfg);
   P_CFG_WRN(cfg);
-
   return cfg;
 }
 
@@ -924,6 +923,7 @@ Return:
 ******************************************************************************/
 static int conf_verify(const cfg_t *cfg, CONF *conf) {
   int i, e, num;
+  
   /* Check CUBIC_SIM first, since it decides whether random is needed. */
   if (!cfg_is_set(cfg, &conf->issim)) {
     P_ERR(FMT_KEY(CUBIC_SIM) " is not set\n");
@@ -966,7 +966,7 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
     P_ERR("no output file specified\n");
     return POWSPEC_ERR_CFG;
   }
-
+  
   /* Check format settings of DATA_CATALOG. */
   //if ((e = check_file_fmt(cfg, conf->ndata, "DATA", conf->issim,
   //    &conf->dfname, conf->has_asc, &conf->dftype, &conf->dskip,
@@ -992,7 +992,7 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
   //    return POWSPEC_ERR_CFG;
   //  }
   //}
-
+  
   /* Check if coordinate coversion is required. */
   conf->cnvt = false;
   if (!conf->issim) {
@@ -1017,6 +1017,7 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
       else conf->cnvt = DEFAULT_CONVERT;
     }
   }
+  
   /* Check the fiducial cosmology. */
   if (conf->cnvt) {
     /* Check Z_CMVDST_CNVT. */
@@ -1035,7 +1036,7 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
       }
     }
   }
-
+  
   /* Check LINE_OF_SIGHT. */
   if (conf->issim) {
     if ((num = cfg_get_size(cfg, &conf->los))) {
@@ -1059,10 +1060,10 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
       conf->los[2] = 1;
     }
   }
-
+  
   /* Check BOX_SIZE and BOX_PAD. */
   if ((e = check_box(cfg, conf->issim, &conf->bsize, &conf->bpad))) return e;
-
+  
   /* Check GRID_SIZE. */
   if (!cfg_is_set(cfg, &conf->gsize)) {
     P_ERR(FMT_KEY(GRID_SIZE) " is not set\n");
@@ -1092,7 +1093,7 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
         return POWSPEC_ERR_CFG;
     }
   }
-
+  
   /* Check GRID_INTERLACE. */
   if (!cfg_is_set(cfg, &conf->intlace)) conf->intlace = DEFAULT_GRID_INTERLACE;
 
@@ -1169,13 +1170,15 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
       return POWSPEC_ERR_CFG;
     }
   }
-
+  
   /* Check OUTPUT_HEADER. */
   if (!cfg_is_set(cfg, &conf->oheader)) conf->oheader = DEFAULT_HEADER;
-
+  
   /* Check VERBOSE. */
   if (!cfg_is_set(cfg, &conf->verbose)) conf->verbose = DEFAULT_VERBOSE;
+  
   return 0;
+  
 }
 
 
@@ -1190,19 +1193,20 @@ Arguments:
   * `conf`:     structure for storing configurations.
 ******************************************************************************/
 static void conf_print(const CONF *conf) {
+  
   /* Configuration file */
   printf("\n  CONFIG_FILE     = %s", conf->fconf);
-
+  
   /* Data catalog. */
   const bool twocat = (conf->ndata == 2) ? true : false;
-  printf("\n  DATA_CATALOG    = %s", conf->dfname[0]);
-  if (twocat) printf("\n                    %s", conf->dfname[1]);
-  int tmp = (conf->dftype) ? conf->dftype[0] : DEFAULT_FILE_FORMAT;
-  printf("\n  DATA_FORMAT     = %s", powspec_ffmt_names[tmp]);
-  if (twocat) {
-    tmp = (conf->dftype) ? conf->dftype[1] : DEFAULT_FILE_FORMAT;
-    printf(" , %s", powspec_ffmt_names[tmp]);
-  }
+  //printf("\n  DATA_CATALOG    = %s", conf->dfname[0]);
+  //if (twocat) printf("\n                    %s", conf->dfname[1]);
+  //int tmp = (conf->dftype) ? conf->dftype[0] : DEFAULT_FILE_FORMAT;
+  //printf("\n  DATA_FORMAT     = %s", powspec_ffmt_names[tmp]);
+  //if (twocat) {
+  //  tmp = (conf->dftype) ? conf->dftype[1] : DEFAULT_FILE_FORMAT;
+  //  printf(" , %s", powspec_ffmt_names[tmp]);
+  //}
 
   //if (conf->has_asc[0]) {
   //  if (conf->dskip) {
@@ -1377,7 +1381,6 @@ CONF *load_conf(const int argc, char *const *argv) {
 
   CONF *conf = conf_init();
   if (!conf) return NULL;
-
   cfg_t *cfg = conf_read(conf, argc, argv);
   if (!cfg) {
     conf_destroy(conf);
@@ -1390,7 +1393,7 @@ CONF *load_conf(const int argc, char *const *argv) {
     cfg_destroy(cfg);
     return NULL;
   }
-
+  
   if (conf->verbose) conf_print(conf);
 
   if (cfg_is_set(cfg, &conf->fconf)) free(conf->fconf);

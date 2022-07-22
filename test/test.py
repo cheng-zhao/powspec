@@ -21,23 +21,47 @@ w = np.ones(nobj)
 
 pk = compute_cross_box(data[:,0], data[:,1], data[:,2], w, 
                        data[:,0], data[:,1], data[:,2], w,
-                       )
+                       powspec_conf_file = "test/powspec_cross.conf",
+                       output_auto = ["test/box_auto_test_1.powspec", "test/box_auto_test_2.powspec"],
+                       output_cross = "test/box_cross_test.powspec")
 
 print("Plotting", flush=True)
 fig, ax = pplt.subplots(nrows=1, ncols=3, share = 0)
 
 for i in range(3):
     for j in range(2):
-        ax[i].semilogx(pk['k'], pk['k'] * pk['auto_multipoles'][j,:,i], label=j)
+        ax[i].semilogx(pk['k'], pk['k'] * pk['auto_multipoles'][j,:,i], label=j+1)
     ax[i].semilogx(pk['k'], pk['k'] * pk['cross_multipoles'][:,i], label="1x2")
 fig.savefig('test/test.png', dpi=300)
 
-pk = compute_auto_box(data[:,0], data[:,1], data[:,2], w)
+pk = compute_auto_box(data[:,0], data[:,1], data[:,2], w, 
+                      powspec_conf_file = "test/powspec_auto.conf",
+                      output_file = "test/box_auto_test.powspec")
 print("Plotting", flush=True)
 
 for i in range(3):
     ax[i].semilogx(pk['k'], pk['k'] * pk['multipoles'][:,i], label='auto')
-    ax[i].legend(loc='top')
 fig.savefig('test/test.png', dpi=300)
 
 
+try:
+    res = np.loadtxt("test/box_auto_ref.powspec")
+    for i in range(3):
+        ax[i].semilogx(res[:,0], res[:,0]*res[:,5+i], label="auto ref", ls='--')
+    res = np.loadtxt("test/box_auto_ref_1.powspec")
+    for i in range(3):
+        ax[i].semilogx(res[:,0], res[:,0]*res[:,5+i], label="1 ref", ls='--')
+    res = np.loadtxt("test/box_auto_ref_2.powspec")
+    for i in range(3):
+        ax[i].semilogx(res[:,0], res[:,0]*res[:,5+i], label="2 ref", ls='--')
+    res = np.loadtxt("test/box_cross_ref.powspec")
+    for i in range(3):
+        ax[i].semilogx(res[:,0], res[:,0]*res[:,5+i], label="1x2 ref", ls='--')
+
+    
+except OSError as e:
+    print(e)
+    pass
+
+[a.legend(loc='top') for a in ax]
+fig.savefig('test/test.png', dpi=300)
