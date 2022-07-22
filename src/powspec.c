@@ -21,10 +21,10 @@
 #include <stdlib.h>
 
 PK *compute_pk(CATA *cata, bool save_out, int argc, char *argv[]) {
-  //printf("The following arguments were passed to main():\n");
-  //printf("argnum \t value \n");
-  //for (int i = 0; i<argc; i++) printf("%d \t %s \n", i, argv[i]);
-  //printf("\n");
+  printf("The following arguments were passed to main():\n");
+  printf("argnum \t value \n");
+  for (int i = 0; i<argc; i++) printf("%d \t %s \n", i, argv[i]);
+  printf("\n");
 
   CONF *conf;
   if (!(conf = load_conf(argc, argv))) {
@@ -33,14 +33,8 @@ PK *compute_pk(CATA *cata, bool save_out, int argc, char *argv[]) {
     return NULL;
   }
 
-  // CATA *cata;
-  // if (!(cata = read_cata(conf))) {
-  //   printf(FMT_FAIL);
-  //   P_EXT("failed to read the catalogs.\n");
-  //   conf_destroy(conf);
-  //   return POWSPEC_ERR_CATA;
-  // }
-
+  conf->ndata = cata->num; // Trigger XPk computation even if not saved
+ 
   if (cnvt_coord(conf, cata)) {
     printf(FMT_FAIL);
     P_EXT("failed to convert coordinates\n");

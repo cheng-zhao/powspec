@@ -2,7 +2,7 @@ import proplot as pplt
 import numpy as np
 import sys
 sys.path.append("/global/u1/d/dforero/codes/powspec_py/powspec/")
-from pypowspec import compute_auto_powspec
+from pypowspec import compute_auto_box, compute_cross_box
 
 try:
     import pandas as pd
@@ -18,10 +18,26 @@ except:
 
 nobj = data.shape[0]
 w = np.ones(nobj)
-pk = compute_auto_powspec(data[:,0], data[:,1], data[:,2], w, output_file = "test/test.powspec")
-print(pk)
+
+pk = compute_cross_box(data[:,0], data[:,1], data[:,2], w, 
+                       data[:,0], data[:,1], data[:,2], w,
+                       )
+
 print("Plotting", flush=True)
 fig, ax = pplt.subplots(nrows=1, ncols=3, share = 0)
+
 for i in range(3):
-    ax[i-1].semilogx(pk['k'], pk['k'] * pk['multipoles'][:,i])
+    for j in range(2):
+        ax[i].semilogx(pk['k'], pk['k'] * pk['auto_multipoles'][j,:,i], label=j)
+    ax[i].semilogx(pk['k'], pk['k'] * pk['cross_multipoles'][:,i], label="1x2")
 fig.savefig('test/test.png', dpi=300)
+
+pk = compute_auto_box(data[:,0], data[:,1], data[:,2], w)
+print("Plotting", flush=True)
+
+for i in range(3):
+    ax[i].semilogx(pk['k'], pk['k'] * pk['multipoles'][:,i], label='auto')
+    ax[i].legend(loc='top')
+fig.savefig('test/test.png', dpi=300)
+
+

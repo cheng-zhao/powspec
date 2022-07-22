@@ -116,4 +116,11 @@ Arguments:
 ******************************************************************************/
 void conf_destroy(CONF *conf);
 
+
+CONF *conf_init(void);
+
+
+int check_cosmo_lib(double *omega_m, double *omega_l,
+    double *omega_k, double *eos_w);
+
 #endif
