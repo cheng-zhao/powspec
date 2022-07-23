@@ -58,13 +58,13 @@ PK *compute_pk(CATA *cata, bool save_out, int argc, char *argv[]) {
     return NULL;
   }
 
-  for (int i = 0; i < pk->nbin;i++){
-    for (int k = 0; k < cata->num; k++){
-      printf("%lf ", pk->pl[k][0][i]);
-    }
-    printf("\n");
-    
-  }
+  //for (int i = 0; i < pk->nbin;i++){
+  //  for (int k = 0; k < cata->num; k++){
+  //    printf("%lf ", pk->pl[k][1][i]);
+  //  }
+  //  printf("\n");
+  //  
+  //}
 
 
    if (save_out && save_res(conf, cata, mesh, pk)) {

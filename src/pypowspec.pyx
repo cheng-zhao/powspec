@@ -1,5 +1,5 @@
 #cython: language_level=3
-#cython: boundscheck = True
+#cython: boundscheck = False
 import cython
 from cython.parallel import prange, threadid
 cimport openmp
