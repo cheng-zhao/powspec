@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-PK *compute_pk(CATA *cata, bool save_out, int argc, char *argv[]) {
+PK *compute_pk(CATA *cata, bool save_out, bool has_randoms, int argc, char *argv[]) {
   //printf("The following arguments were passed to main():\n");
   //printf("argnum \t value \n");
   //for (int i = 0; i<argc; i++) printf("%d \t %s \n", i, argv[i]);
@@ -34,6 +34,9 @@ PK *compute_pk(CATA *cata, bool save_out, int argc, char *argv[]) {
   }
 
   conf->ndata = cata->num; // Trigger XPk computation even if not saved
+  if (cata->rand != NULL){
+    conf->has_randoms = has_randoms;
+  }
  
   if (cnvt_coord(conf, cata)) {
     printf(FMT_FAIL);

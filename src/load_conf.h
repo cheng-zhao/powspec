@@ -90,6 +90,7 @@ typedef struct {
   bool oheader;         /* OUTPUT_HEADER   */
   int ovwrite;          /* OVERWRITE       */
   bool verbose;         /* VERBOSE         */
+  bool has_randoms;     /* HAS RANDOMS     */ 
 } CONF;
 
 

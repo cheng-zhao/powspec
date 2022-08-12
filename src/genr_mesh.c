@@ -427,7 +427,7 @@ Arguments:
 static void get_coord_bound(const CATA *cat, double min[3], double max[3]) {
   min[0] = min[1] = min[2] = DBL_MAX;
   max[0] = max[1] = max[2] = -DBL_MAX;
-
+  
   for (int i = 0; i < cat->num; i++) {
 #ifdef OMP
 #pragma omp parallel
@@ -510,6 +510,7 @@ static int def_box(const CATA *cat, const bool issim, const double *bsize,
     const double *bpad, double size[3], double bmin[3], double max[3],
     const int verb) {
   double min[3];
+  
   /* Obtain the boundaries of the input catalogs. */
   get_coord_bound(cat, min, max);
   const char c[3] = {'x', 'y', 'z'};
@@ -652,6 +653,7 @@ static MESH *mesh_init(const CONF *conf) {
   if (!mesh) return NULL;
 
   mesh->issim = conf->issim;
+  mesh->has_randoms = conf->has_randoms;
   mesh->intlace = conf->intlace;
   mesh->assign = conf->assign;
   mesh->fft_init = false;
@@ -672,7 +674,8 @@ static MESH *mesh_init(const CONF *conf) {
   if (!(mesh->Fr = malloc(mesh->num * sizeof(FFT_REAL *)))) {
     free(mesh); return NULL;
   }
-  if (!mesh->issim || mesh->intlace) {
+  //if (!mesh->issim || mesh->intlace) {
+  if (mesh->has_randoms || mesh->intlace) {
     if (!(mesh->Frl = malloc(mesh->num * sizeof(FFT_REAL *)))) {
       mesh_destroy(mesh); return NULL;
     }
@@ -694,7 +697,8 @@ static MESH *mesh_init(const CONF *conf) {
       mesh_destroy(mesh); return NULL;
     }
     size += mesh->Ntot * sizeof(FFT_REAL);
-    if (!mesh->issim || mesh->intlace) {
+    //if (!mesh->issim || mesh->intlace) {
+    if (mesh->has_randoms || mesh->intlace) {
       if (!(mesh->Frl[i] = FFT_MALLOC(mesh->Ntot * sizeof(FFT_REAL)))) {
         mesh_destroy(mesh); return NULL;
       }
@@ -715,7 +719,8 @@ static MESH *mesh_init(const CONF *conf) {
     mesh_destroy(mesh); return NULL;
   }
   size += mesh->Ncmplx * sizeof(FFT_REAL);
-  if (!mesh->issim && conf->poles[conf->npole - 1]) {
+  //if (!mesh->issim && conf->poles[conf->npole - 1]) {
+  if (mesh->has_randoms && conf->poles[conf->npole - 1]) {
     if (!(mesh->Fka = FFT_MALLOC(mesh->Ncmplx * sizeof(FFT_CMPLX)))) {
       mesh_destroy(mesh); return NULL;
     }
@@ -794,7 +799,8 @@ static void gen_dens(CATA *cat, MESH *mesh, const int verb) {
   for (int i = 0; i < cat->num; i++) {
     memset(mesh->Fr[i], 0, mesh->Ntot * sizeof(FFT_REAL));
     to_mesh(cat->data[i], cat->ndata[i], mesh, mesh->min, mesh->Fr[i]);
-    if (!mesh->issim) {
+    //if (!mesh->issim) {
+    if (mesh->has_randoms) {
       memset(mesh->Frl[i], 0, mesh->Ntot * sizeof(FFT_REAL));
       to_mesh(cat->rand[i], cat->nrand[i], mesh, mesh->min, mesh->Frl[i]);
 
@@ -831,7 +837,8 @@ static void gen_dens(CATA *cat, MESH *mesh, const int verb) {
       memset(mesh->Frl[i], 0, mesh->Ntot * sizeof(FFT_REAL));
       to_mesh(cat->data[i], cat->ndata[i], mesh, mesh->smin, mesh->Frl[i]);
 
-      if (!mesh->issim) {
+      //if (!mesh->issim) {
+      if (mesh->has_randoms) {
         /* Boundary check and generate mesh for the random catalog. */
         if (catshift) shift_cat(cat->rand[i], cat->nrand[i], mesh);
         memset(mesh->Fr[i], 0, mesh->Ntot * sizeof(FFT_REAL));
@@ -884,19 +891,20 @@ MESH *genr_mesh(const CONF *conf, CATA *cat) {
     P_ERR("catalogs not read\n");
     return NULL;
   }
-
+  printf("TEST\n"); fflush(stdout);
   /* Initialise the meshes. */
   MESH *mesh = mesh_init(conf);
   if (!mesh) {
     P_ERR("failed to initalise the meshes\n");
     return NULL;
   }
+  
 
   /* Define the box. */
   if (def_box(cat, conf->issim, conf->bsize, conf->bpad, mesh->bsize,
         mesh->min, mesh->max, conf->verbose))
     return NULL;
-
+  
   /* Generate the density fields. */
   gen_dens(cat, mesh, conf->verbose);
 

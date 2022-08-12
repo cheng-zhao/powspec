@@ -154,7 +154,7 @@ cdef extern from "read_cata.h":
 # powspec.h
 cdef extern from "powspec.h":
 
-    PK *compute_pk(CATA* cata, bint save_out, int argc, char* argv[]) nogil;
+    PK *compute_pk(CATA* cata, bint save_out, bint has_randoms, int argc, char* argv[]) nogil;
 
 # multipole.h
 
@@ -219,11 +219,13 @@ cdef double* numpy_to_cata(double[:,:] positions,
             cat.rand[data_id][j].x[0] = positions[j,0]
             cat.rand[data_id][j].x[1] = positions[j,1]
             cat.rand[data_id][j].x[2] = positions[j,2]
-            cat.rand[data_id][j].w = positions[j,3] * positions[j,4]
             cat.wrand[data_id] += positions[j,3]
-            # Rands always imply sims here
-            sumw2[0] += cat.rand[data_id][j].w**2
-            sumw2[1] += positions[j,3] * positions[j,4]**2 * positions[j,5]
+            if not is_sim:
+                cat.rand[data_id][j].w = positions[j,3] * positions[j,4]
+                sumw2[0] += cat.rand[data_id][j].w**2
+                sumw2[1] += positions[j,3] * positions[j,4]**2 * positions[j,5]
+            else:
+                cat.rand[data_id][j].w = positions[j,3]
     return sumw2
 
 
@@ -275,7 +277,7 @@ def compute_auto_box(double[:] data_x, #Assumes double precision input/FFTW!
                     0,
                     True)
 
-    cdef PK* pk = compute_pk(cat, <bint> save_out, argc, argv)
+    cdef PK* pk = compute_pk(cat, <bint> save_out, False, argc, argv)
     pk_result = {}
     pk_result['n_data_objects'] = cat.ndata[0]
     pk_result['w_data_objects'] = cat.wdata[0]
@@ -369,7 +371,7 @@ def compute_cross_box(double[:] data_1_x, #Assumes double precision input/FFTW!
                     True)
 
 
-    cdef PK* pk = compute_pk(cat, <bint> save_auto, argc, argv)
+    cdef PK* pk = compute_pk(cat, <bint> save_auto, False, argc, argv)
     pk_result = {}
     pk_result['n_data_objects'] = [cat.ndata[i] for i in range(cat.num)]
     pk_result['w_data_objects'] = [cat.wdata[i] for i in range(cat.num)]
@@ -474,13 +476,11 @@ def compute_auto_lc(double[:] data_x, #Assumes double precision input/FFTW!
     elif (sumw2_ran[1] == 0): cat.norm[i] = sumw2_dat[1]
     # Check consistency (TODO) and Normalise using the random. 
     else: cat.norm[i] = cat.alpha[i] * sumw2_ran[1]
-    print(sumw2_dat[0], sumw2_dat[1])
-    print(sumw2_ran[0], sumw2_ran[1])
-    print(cat.shot[0])
+    
     
 
 
-    cdef PK* pk = compute_pk(cat, <bint> save_out, argc, argv)
+    cdef PK* pk = compute_pk(cat, <bint> save_out, True, argc, argv)
     pk_result = {}
     pk_result['n_data_objects'] = cat.ndata[0]
     pk_result['w_data_objects'] = cat.wdata[0]
@@ -639,7 +639,7 @@ def compute_cross_lc(double[:] data_1_x, #Assumes double precision input/FFTW!
     
 
 
-    cdef PK* pk = compute_pk(cat, <bint> save_auto, argc, argv)
+    cdef PK* pk = compute_pk(cat, <bint> save_auto, True, argc, argv)
     pk_result = {}
     pk_result['n_data_objects'] = [cat.ndata[i] for i in range(cat.num)]
     pk_result['w_data_objects'] = [cat.wdata[i] for i in range(cat.num)]
@@ -666,6 +666,253 @@ def compute_cross_lc(double[:] data_1_x, #Assumes double precision input/FFTW!
             for k in range(ndata):
                 pk_result['auto_multipoles'][k,i,j] = pk.pl[k][j][i]
         
+    cata_destroy(cat)
+    powspec_destroy(pk)
+    free(sumw2_dat)
+    free(sumw2_ran)
+    
+    return pk_result
+
+def compute_auto_box_rand(double[:] data_x, #Assumes double precision input/FFTW!
+                          double[:] data_y, 
+                          double[:] data_z, 
+                          double[:] data_w,
+                          double[:] rand_x, #Assumes double precision input/FFTW!
+                          double[:] rand_y, 
+                          double[:] rand_z, 
+                          double[:] rand_w,
+                          powspec_conf_file,
+                          output_file = None):
+
+    
+    save_out = output_file is not None
+    if not save_out:
+        # Define dummy names for IO so conf does not crash
+        test_output = "--auto=test/test.out"
+    else:
+        test_output = f"--auto={output_file}"
+    test_output_bytes = test_output.encode('utf-8') + b'\x00'
+    cdef char* test_output_string = test_output_bytes
+
+    # Define name of the configuration file to use
+    # TODO: Generate temporary configuration file at fixed location
+    #       from options passed to function. See i.e. 
+    #       https://github.com/dforero0896/fcfcwrap
+    # TODO: (Alternative/harder) override CONF structure
+    conf = f"--conf={powspec_conf_file}"
+    conf_bytes = conf.encode('utf-8') + b'\x00'
+    cdef char* conf_string = conf_bytes
+
+    
+
+    # Define dummy argc, argv to send to powspec main function
+    # This should remain similar once we generate a conf file.
+    cdef int argc = 3
+    cdef char* argv[3]
+    argv[0] = arg0_str
+    argv[1] = conf_string
+    argv[2] = test_output_string
+
+    # Create CATA structure (involves data copying)
+    cdef int ndata = 1;
+    cdef int i = 0;
+    cdef CATA* cat = cata_init(ndata)
+    
+    
+    cdef double* sumw2_dat = numpy_to_cata(np.c_[data_x, data_y, data_z, data_w],
+                    cat,
+                    i,
+                    0,
+                    True)
+
+    cdef double* sumw2_ran = numpy_to_cata(np.c_[rand_x, rand_y, rand_z, rand_w],
+                    cat,
+                    i,
+                    1,
+                    True)
+    
+    cat.alpha[i] = cat.wdata[i] / cat.wrand[i]
+    # Shot noise from both data and random 
+    cat.shot[i] = sumw2_dat[0] + cat.alpha[i] * cat.alpha[i] * sumw2_ran[0]
+    # Normalise using the random. 
+    if (sumw2_dat[1] == 0): cat.norm[i] = cat.alpha[i] * sumw2_ran[1]
+    #Normalise using the data. 
+    elif (sumw2_ran[1] == 0): cat.norm[i] = sumw2_dat[1]
+    # Check consistency (TODO) and Normalise using the random. 
+    else: cat.norm[i] = cat.alpha[i] * sumw2_ran[1]
+
+    cdef PK* pk = compute_pk(cat, <bint> save_out, True, argc, argv)
+    pk_result = {}
+    pk_result['n_data_objects'] = cat.ndata[0]
+    pk_result['w_data_objects'] = cat.wdata[0]
+    pk_result['shot_noise'] = cat.shot[0]
+    pk_result['normalisation'] = cat.norm[0]
+    pk_result['k'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['kmin'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['kmax'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['kavg'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['nmodes'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['multipoles'] = np.empty((pk.nbin, pk.nl), dtype = np.double) 
+    
+
+   
+    for i in range(pk.nbin):
+        pk_result['k'][i] = pk.k[i]
+        pk_result['kavg'][i] = pk.km[i]
+        pk_result['kmin'][i] = pk.kedge[i]
+        pk_result['kmax'][i] = pk.kedge[i+1]
+        pk_result['nmodes'][i] = pk.cnt[i]
+        for j in range(pk.nl):
+            pk_result['multipoles'][i,j] = pk.pl[0][j][i]
+        
+        #printf("%lf %lf %lf %lf\n", pk.k[i], pk.pl[0][0][i], pk.pl[0][1][i], pk.pl[0][2][i])
+
+    cata_destroy(cat)
+    powspec_destroy(pk)
+    free(sumw2_dat)
+    free(sumw2_ran)
+    
+    return pk_result
+
+def compute_cross_box_rand(double[:] data_1_x, #Assumes double precision input/FFTW!
+                           double[:] data_1_y, 
+                           double[:] data_1_z, 
+                           double[:] data_1_w,
+                           double[:] rand_1_x, #Assumes double precision input/FFTW!
+                           double[:] rand_1_y, 
+                           double[:] rand_1_z, 
+                           double[:] rand_1_w,
+                           double[:] data_2_x, #Assumes double precision input/FFTW!
+                           double[:] data_2_y, 
+                           double[:] data_2_z, 
+                           double[:] data_2_w,
+                           double[:] rand_2_x, #Assumes double precision input/FFTW!
+                           double[:] rand_2_y, 
+                           double[:] rand_2_z, 
+                           double[:] rand_2_w,
+                           powspec_conf_file,
+                           output_auto = None,
+                           output_cross = None):
+
+    
+    save_auto = output_auto is not None
+    if not save_auto:
+        # Define dummy names for IO so conf does not crash
+        auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+        cross_output = "--cross=test/cross.out"
+    else:
+        auto_output = f"--auto=[{','.join(output_auto)}]"
+        cross_output = f"--cross={output_cross}"
+    auto_output_bytes = auto_output.encode('utf-8') + b'\x00'
+    cdef char* auto_output_string = auto_output_bytes
+
+    cross_output_bytes = cross_output.encode('utf-8') + b'\x00'
+    cdef char* cross_output_string = cross_output_bytes
+
+    # Define name of the configuration file to use
+    # TODO: Generate temporary configuration file at fixed location
+    #       from options passed to function. See i.e. 
+    #       https://github.com/dforero0896/fcfcwrap
+    # TODO: (Alternative/harder) override CONF structure
+    conf = f"--conf={powspec_conf_file}"
+    conf_bytes = conf.encode('utf-8') + b'\x00'
+    cdef char* conf_string = conf_bytes
+
+    # Define dummy argc, argv to send to powspec main function
+    # This should remain similar once we generate a conf file.
+    cdef int argc = 4
+    cdef char* argv[4]
+    argv[0] = arg0_str
+    argv[1] = conf_string
+    argv[2] = auto_output_string
+    argv[3] = cross_output_string
+
+    # Create CATA structure (involves data copying)
+    cdef int ndata = 2;
+    cdef int i = 0;
+    cdef CATA* cat = cata_init(ndata)
+    
+    
+    cdef double* sumw2_dat = numpy_to_cata(np.c_[data_1_x, data_1_y, data_1_z, data_1_w],
+                    cat,
+                    i,
+                    0,
+                    True)
+
+    cdef double* sumw2_ran = numpy_to_cata(np.c_[rand_1_x, rand_1_y, rand_1_z, rand_1_w],
+                    cat,
+                    i,
+                    1,
+                    True)
+    
+    cat.alpha[i] = cat.wdata[i] / cat.wrand[i]
+    # Shot noise from both data and random 
+    cat.shot[i] = sumw2_dat[0] + cat.alpha[i] * cat.alpha[i] * sumw2_ran[0]
+    # Normalise using the random. 
+    if (sumw2_dat[1] == 0): cat.norm[i] = cat.alpha[i] * sumw2_ran[1]
+    #Normalise using the data. 
+    elif (sumw2_ran[1] == 0): cat.norm[i] = sumw2_dat[1]
+    # Check consistency (TODO) and Normalise using the random. 
+    else: cat.norm[i] = cat.alpha[i] * sumw2_ran[1]
+
+    i = 1;
+    sumw2_dat[0] = 0
+    sumw2_dat[1] = 0
+    sumw2_ran[0] = 0
+    sumw2_ran[1] = 0
+
+    sumw2_dat = numpy_to_cata(np.c_[data_2_x, data_2_y, data_2_z, data_2_w],
+                    cat,
+                    i,
+                    0,
+                    True)
+
+    sumw2_ran = numpy_to_cata(np.c_[rand_2_x, rand_2_y, rand_2_z, rand_2_w],
+                    cat,
+                    i,
+                    1,
+                    True)
+
+
+    cat.alpha[i] = cat.wdata[i] / cat.wrand[i]
+    # Shot noise from both data and random 
+    cat.shot[i] = sumw2_dat[0] + cat.alpha[i] * cat.alpha[i] * sumw2_ran[0]
+    # Normalise using the random. 
+    if (sumw2_dat[1] == 0): cat.norm[i] = cat.alpha[i] * sumw2_ran[1]
+    #Normalise using the data. 
+    elif (sumw2_ran[1] == 0): cat.norm[i] = sumw2_dat[1]
+    # Check consistency (TODO) and Normalise using the random. 
+    else: cat.norm[i] = cat.alpha[i] * sumw2_ran[1]
+
+    cdef PK* pk = compute_pk(cat, <bint> save_auto, True, argc, argv)
+    pk_result = {}
+    pk_result['n_data_objects'] = [cat.ndata[i] for i in range(cat.num)]
+    pk_result['w_data_objects'] = [cat.wdata[i] for i in range(cat.num)]
+    pk_result['shot_noise'] = [cat.shot[i] for i in range(cat.num)]
+    pk_result['normalisation'] = [cat.norm[i] for i in range(cat.num)]
+    pk_result['k'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['kmin'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['kmax'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['kavg'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['nmodes'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['auto_multipoles'] = np.empty((ndata, pk.nbin, pk.nl), dtype = np.double) 
+    pk_result['cross_multipoles'] = np.empty((pk.nbin, pk.nl), dtype = np.double) 
+    
+
+   
+    for i in range(pk.nbin):
+        pk_result['k'][i] = pk.k[i]
+        pk_result['kavg'][i] = pk.km[i]
+        pk_result['kmin'][i] = pk.kedge[i]
+        pk_result['kmax'][i] = pk.kedge[i+1]
+        pk_result['nmodes'][i] = pk.cnt[i]
+        for j in range(pk.nl):
+            pk_result['cross_multipoles'][i,j] = pk.xpl[j][i]
+            for k in range(ndata):
+                pk_result['auto_multipoles'][k,i,j] = pk.pl[k][j][i]
+        
+        #printf("%lf %lf %lf %lf\n", pk.k[i], pk.pl[0][0][i], pk.pl[0][1][i], pk.pl[0][2][i])
+
     cata_destroy(cat)
     powspec_destroy(pk)
     free(sumw2_dat)

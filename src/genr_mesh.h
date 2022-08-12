@@ -56,6 +56,7 @@ typedef struct {
   double smin[3];               /* lower boundary for the interlaced box */
   double bsize[3];              /* box size                              */
   bool issim;                   /* whether this is for a simulation box  */
+  bool has_randoms;             /* whether this has randoms              */
   bool intlace;                 /* whether grid interlacing is enabled   */
   bool fft_init;                /* whether FFTW has been initialised     */
   powspec_assign_t assign;      /* particle assignment scheme            */

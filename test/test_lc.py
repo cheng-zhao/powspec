@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use("Agg")
 import proplot as pplt
 import numpy as np
 import sys
