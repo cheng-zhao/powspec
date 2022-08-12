@@ -1,7 +1,9 @@
 # powspec
 
 This repository contains a small Cython wrapper to the original [code](https://github.com/cheng-zhao/powspec) by Cheng Zhao.
-In the current iteration, this wrapper allows to lauch (auto and cross) power spectrum computation from in-memory data in the form of numpy arrays for periodic and non-periodic (survey-like) data. So far *only the `float64` version has been implemented*. I have not done many tests but the ones performed show equivalent results to those obtained by directly invoking the C code.
+In the current iteration, this wrapper allows to lauch (auto and cross) power spectrum computation from in-memory data in the form of numpy arrays for periodic and non-periodic (survey-like) data. Furthermore, it expands on the original code's capability by allowing the use of randoms for simulation boxes too. This is useful when computing post-BAO reconstruction power spectra where shifted randoms are required.
+
+So far *only the `float64` version has been implemented*. I have not done many tests but the ones performed show equivalent results to those obtained by directly invoking the C code. Using randoms with boxes was tested with uniform randoms 10x the size of the catalog and show agreement with the C code's periodic box data for the most part (small scales are slightly biased). 
 
 ## Use of the Python wrapper
 
@@ -122,6 +124,51 @@ pk = compute_cross_lc(data[:,0], data[:,1], data[:,2], wdata, fkp_data, data[:,3
                     powspec_conf_file = "test/powspec_lc_cross.conf",
                     output_auto = ["test/lc_auto_test_1.powspec","test/lc_auto_test_1.powspec"],
                     output_cross = "test/lc_cross_test.powspec")
+```
+
+### Auto power spectrum of reconstructed boxes
+
+```python
+import numpy as np
+import sys
+sys.path.append("/global/u1/d/dforero/codes/powspec_py/powspec/")
+from pypowspec import compute_auto_box_rand, compute_cross_box_rand
+import pandas as pd
+test_fname = "/global/project/projectdirs/desi/mocks/UNIT/HOD_Shadab/HOD_boxes/redshift0.9873/UNIT_DESI_Shadab_HOD_snap97_ELG_v0.txt"
+data = pd.read_csv(test_fname, usecols = (0,1,3), engine='c', delim_whitespace=True, names = ['x', 'y', 'zrsd']).values
+nobj = data.shape[0]
+rand = (data.max() - data.min()) * np.random.random((10 * nobj, 3)).astype(np.double)
+wdata = np.ones(data.shape[0])
+wrand = np.ones(rand.shape[0])
+pk = compute_auto_box_rand(data[:,0], data[:,1], data[:,2], wdata,
+                      rand[:,0], rand[:,1], rand[:,2], wrand, 
+                      powspec_conf_file = "test/powspec_auto.conf",
+                      output_file = "test/box_auto_test_rand.powspec")
+
+```
+### Cross power spectrum of reconstructed boxes
+
+```python
+import numpy as np
+import sys
+sys.path.append("/global/u1/d/dforero/codes/powspec_py/powspec/")
+from pypowspec import compute_auto_box_rand, compute_cross_box_rand
+import pandas as pd
+test_fname = "/global/project/projectdirs/desi/mocks/UNIT/HOD_Shadab/HOD_boxes/redshift0.9873/UNIT_DESI_Shadab_HOD_snap97_ELG_v0.txt"
+data = pd.read_csv(test_fname, usecols = (0,1,3), engine='c', delim_whitespace=True, names = ['x', 'y', 'zrsd']).values
+nobj = data.shape[0]
+rand = (data.max() - data.min()) * np.random.random((10 * nobj, 3)).astype(np.double)
+wdata = np.ones(data.shape[0])
+wrand = np.ones(rand.shape[0])
+
+pk = compute_cross_box_rand(data[:,0], data[:,1], data[:,2], wdata, 
+                       rand[:,0], rand[:,1], rand[:,2], wrand, 
+                       data[:,0], data[:,1], data[:,2], wdata, 
+                       rand[:,0], rand[:,1], rand[:,2], wrand,
+                       powspec_conf_file = "test/powspec_cross.conf",
+                       output_auto = ["test/box_auto_test_rand_1.powspec", "test/box_auto_test_rand_2.powspec"],
+                       output_cross = "test/box_cross_test_rand.powspec")
+
 ```
 
 Please do not hesitate to contact me if you find any bugs. Below, you may find the documentation to the original C code.
