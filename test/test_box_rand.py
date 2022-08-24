@@ -19,7 +19,7 @@ except:
     data = 1000. * np.random.random((nobj, 3)).astype(np.double)
 
 np.random.seed(0)
-rand = (data.max() - data.min()) * np.random.random((10 * nobj, 3)).astype(np.double)
+rand = (data.max() - data.min()) * np.random.random((50 * nobj, 3)).astype(np.double)
 wdata = np.ones(data.shape[0])
 wrand = np.ones(rand.shape[0])
 
