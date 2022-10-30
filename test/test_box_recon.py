@@ -9,8 +9,10 @@ from pypowspec import compute_auto_box_rand, compute_cross_box_rand
 
 def hankel_sum(k, P, smooth_a, sarr, ell):
     P = P.copy()
-    P *= k ** 3 * np.exp(-(k ** 2) * smooth_a ** 2) * 0.5 / np.pi ** 2
-    delta = np.log(k[1]) - np.log(k[0])
+    #P *= k ** 3 * np.exp(-(k ** 2) * smooth_a ** 2) * 0.5 / np.pi ** 2
+    #delta = np.log(k[1]) - np.log(k[0])
+    P *= k ** 2 * np.exp(-(k ** 2) * smooth_a ** 2) * 0.5 / np.pi ** 2
+    delta = k[1] - k[0]
 
     ks = sarr[:, None] * k[None, :]
     j0 = np.sin(ks) / ks

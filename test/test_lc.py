@@ -34,7 +34,7 @@ pk = compute_auto_lc(data[:,0], data[:,1], data[:,2], wdata, fkp_data, data[:,3]
 print("Plotting", flush=True)
 fig, ax = pplt.subplots(nrows=1, ncols=3, share = 0)
 for i in range(3):
-    ax[i].semilogx(pk['k'], pk['k'] * pk['multipoles'][:,i], label='auto')
+    ax[i].plot(pk['k'], pk['k'] * pk['multipoles'][:,i], label='auto')
     
 
 
@@ -47,22 +47,22 @@ pk = compute_cross_lc(data[:,0], data[:,1], data[:,2], wdata, fkp_data, data[:,3
                     output_cross = "test/lc_cross_test.powspec")
 for i in range(3):
     for j in range(2):
-        ax[i].semilogx(pk['k'], pk['k'] * pk['auto_multipoles'][j,:,i], label=j+1)
-    ax[i].semilogx(pk['k'], pk['k'] * pk['cross_multipoles'][:,i], label="1x2")
+        ax[i].plot(pk['k'], pk['k'] * pk['auto_multipoles'][j,:,i], label=j+1)
+    ax[i].plot(pk['k'], pk['k'] * pk['cross_multipoles'][:,i], label="1x2")
 
 try:
     res = np.loadtxt("test/lc_auto_ref.powspec")
     for i in range(3):
-        ax[i].semilogx(res[:,0], res[:,0]*res[:,5+i], label="auto ref", ls='--')
+        ax[i].plot(res[:,0], res[:,0]*res[:,5+i], label="auto ref", ls='--')
     res = np.loadtxt("test/lc_auto_ref_1.powspec")
     for i in range(3):
-        ax[i].semilogx(res[:,0], res[:,0]*res[:,5+i], label="1 ref", ls='--')
+        ax[i].plot(res[:,0], res[:,0]*res[:,5+i], label="1 ref", ls='--')
     res = np.loadtxt("test/lc_auto_ref_2.powspec")
     for i in range(3):
-        ax[i].semilogx(res[:,0], res[:,0]*res[:,5+i], label="2 ref", ls='--')
+        ax[i].plot(res[:,0], res[:,0]*res[:,5+i], label="2 ref", ls='--')
     res = np.loadtxt("test/lc_cross_ref.powspec")
     for i in range(3):
-        ax[i].semilogx(res[:,0], res[:,0]*res[:,5+i], label="1x2 ref", ls='--')
+        ax[i].plot(res[:,0], res[:,0]*res[:,5+i], label="1x2 ref", ls='--')
     
 except OSError as e:
     print(e)
