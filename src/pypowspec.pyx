@@ -339,6 +339,7 @@ def compute_auto_box(floating[:] data_x, #Assumes double precision input/FFTW!
                                         True)
 
     cdef PK* pk = compute_pk(cat, <bint> save_out, False, argc, argv)
+    if pk is NULL: raise ValueError("Could not create PK structure.")
     pk_result = {}
     pk_result['n_data_objects'] = cat.ndata[0]
     pk_result['w_data_objects'] = cat.wdata[0]
@@ -443,6 +444,7 @@ def compute_cross_box(floating[:] data_1_x, #Assumes double precision input/FFTW
                      
 
     cdef PK* pk = compute_pk(cat, <bint> save_auto, False, argc, argv)
+    if pk is NULL: raise ValueError("Could not create PK structure.")
     pk_result = {}
     pk_result['n_data_objects'] = [cat.ndata[i] for i in range(cat.num)]
     pk_result['w_data_objects'] = [cat.wdata[i] for i in range(cat.num)]
@@ -562,6 +564,7 @@ def compute_auto_lc(floating[:] data_x, #Assumes double precision input/FFTW!
 
 
     cdef PK* pk = compute_pk(cat, <bint> save_out, True, argc, argv)
+    if pk is NULL: raise ValueError("Could not create PK structure.")
     pk_result = {}
     pk_result['n_data_objects'] = cat.ndata[0]
     pk_result['w_data_objects'] = cat.wdata[0]
@@ -741,6 +744,7 @@ def compute_cross_lc(floating[:] data_1_x, #Assumes double precision input/FFTW!
 
 
     cdef PK* pk = compute_pk(cat, <bint> save_auto, True, argc, argv)
+    if pk is NULL: raise ValueError("Could not create PK structure.")
     pk_result = {}
     pk_result['n_data_objects'] = [cat.ndata[i] for i in range(cat.num)]
     pk_result['w_data_objects'] = [cat.wdata[i] for i in range(cat.num)]
@@ -853,6 +857,7 @@ def compute_auto_box_rand(floating[:] data_x, #Assumes double precision input/FF
     else: cat.norm[i] = cat.alpha[i] * sumw2_ran[1]
 
     cdef PK* pk = compute_pk(cat, <bint> save_out, True, argc, argv)
+    if pk is NULL: raise ValueError("Could not create PK structure.")
     pk_result = {}
     pk_result['n_data_objects'] = cat.ndata[0]
     pk_result['w_data_objects'] = cat.wdata[0]
@@ -1016,6 +1021,7 @@ def compute_cross_box_rand(floating[:] data_1_x, #Assumes double precision input
     else: cat.norm[i] = cat.alpha[i] * sumw2_ran[1]
 
     cdef PK* pk = compute_pk(cat, <bint> save_auto, True, argc, argv)
+    if pk is NULL: raise ValueError("Could not create PK structure.")
     pk_result = {}
     pk_result['n_data_objects'] = [cat.ndata[i] for i in range(cat.num)]
     pk_result['w_data_objects'] = [cat.wdata[i] for i in range(cat.num)]

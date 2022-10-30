@@ -891,7 +891,6 @@ MESH *genr_mesh(const CONF *conf, CATA *cat) {
     P_ERR("catalogs not read\n");
     return NULL;
   }
-  printf("TEST\n"); fflush(stdout);
   /* Initialise the meshes. */
   MESH *mesh = mesh_init(conf);
   if (!mesh) {
