@@ -7,6 +7,7 @@ from libc.stdlib cimport malloc, free, calloc
 from libc.stdio cimport FILE, fprintf, fopen, fclose, printf, fflush, stdout, stderr
 import numpy as np
 from libc.math cimport sqrt
+from cython cimport floating
 
 
 arg0_bytes = "POWSPEC".encode('utf-8') + b'\x00'
@@ -189,7 +190,62 @@ def pystring_to_cstring(str string):
     cdef char* cstring = str_bytes
     return cstring
 
-cdef double* numpy_to_cata(double[:,:] positions,
+cdef double* numpy_to_cata(floating[:] data_x, 
+                           floating[:] data_y, 
+                           floating[:] data_z,
+                           floating[:] data_w,
+                           floating[:] data_fkp,
+                           floating[:] data_nz,
+                           CATA* cat,
+                           int data_id,
+                           bint is_rand,
+                           bint is_sim) nogil:
+
+    cdef Py_ssize_t i, j, k
+    cdef double *sumw2 = <double*> malloc(sizeof(double) * 2)
+    sumw2[0] = sumw2[1] = 0
+    # sumw2n is sumw2[1]
+    cdef double wdata_red = 0;
+    cdef double sumw2_0 = 0;
+    cdef double sumw2_1 = 0;
+    printf("Building data structures ...\n")
+    if not is_rand:
+        cat.data[data_id] = <DATA*> malloc(sizeof(DATA) * data_x.shape[0])
+        cat.ndata[data_id] = data_x.shape[0]
+        for j in prange(data_x.shape[0], nogil=True):
+            cat.data[data_id][j].x[0] = <double> data_x[j]
+            cat.data[data_id][j].x[1] = <double> data_y[j]
+            cat.data[data_id][j].x[2] = <double> data_z[j]
+            wdata_red += <double> data_w[j]
+            if not is_sim:
+                cat.data[data_id][j].w = <double> (data_w[j] * data_fkp[j])
+                sumw2_0 += cat.data[data_id][j].w**2
+                sumw2_1 += <double> (data_w[j] * data_fkp[j]**2 * data_nz[j])
+            else:
+                cat.data[data_id][j].w = <double> data_w[j]
+        cat.wdata[data_id] = wdata_red
+        sumw2[0] = sumw2_0
+        sumw2[1] = sumw2_1
+    else:
+        cat.rand[data_id] = <DATA*> malloc(sizeof(DATA) * data_x.shape[0])
+        cat.nrand[data_id] = data_x.shape[0]
+        for j in prange(data_x.shape[0], nogil=True):
+            cat.rand[data_id][j].x[0] = <double> data_x[j]
+            cat.rand[data_id][j].x[1] = <double> data_y[j]
+            cat.rand[data_id][j].x[2] = <double> data_z[j]
+            wdata_red += <double> data_w[j]
+            if not is_sim:
+                cat.rand[data_id][j].w = <double> (data_w[j] * data_fkp[j])
+                sumw2_0 += cat.rand[data_id][j].w**2
+                sumw2_1 += <double> (data_w[j] * data_fkp[j]**2 * data_nz[j])
+            else:
+                cat.rand[data_id][j].w = <double> data_w[j]
+        cat.wrand[data_id] = wdata_red
+        sumw2[0] = sumw2_0
+        sumw2[1] = sumw2_1
+    return sumw2
+    
+cdef double* _numpy_to_cata(double[:,:] positions,
                         CATA* cat,
                         int data_id,
                         bint is_rand,
@@ -231,10 +287,10 @@ cdef double* numpy_to_cata(double[:,:] positions,
 
 
     
-def compute_auto_box(double[:] data_x, #Assumes double precision input/FFTW!
-                        double[:] data_y, 
-                        double[:] data_z, 
-                        double[:] data_w,
+def compute_auto_box(floating[:] data_x, #Assumes double precision input/FFTW!
+                        floating[:] data_y, 
+                        floating[:] data_z, 
+                        floating[:] data_w,
                         powspec_conf_file,
                         output_file = None):
 
@@ -271,11 +327,16 @@ def compute_auto_box(double[:] data_x, #Assumes double precision input/FFTW!
     cdef int ndata = 1;
     cdef CATA* cat = cata_init(ndata)
     
-    cdef double* sumw2 = numpy_to_cata(np.c_[data_x, data_y, data_z, data_w],
-                    cat,
-                    0,
-                    0,
-                    True)
+    cdef double* sumw2 = numpy_to_cata(data_x, 
+                                        data_y, 
+                                        data_z,
+                                        data_w,
+                                        data_w, # Dummy arrays are not used for simulations
+                                        data_w, # Dummy arrays are not used for simulations
+                                        cat,
+                                        0,
+                                        0,
+                                        True)
 
     cdef PK* pk = compute_pk(cat, <bint> save_out, False, argc, argv)
     pk_result = {}
@@ -310,14 +371,14 @@ def compute_auto_box(double[:] data_x, #Assumes double precision input/FFTW!
     return pk_result
 
 
-def compute_cross_box(double[:] data_1_x, #Assumes double precision input/FFTW!
-                      double[:] data_1_y, 
-                      double[:] data_1_z, 
-                      double[:] data_1_w,
-                      double[:] data_2_x, #Assumes double precision input/FFTW!
-                      double[:] data_2_y, 
-                      double[:] data_2_z, 
-                      double[:] data_2_w,
+def compute_cross_box(floating[:] data_1_x, #Assumes double precision input/FFTW!
+                      floating[:] data_1_y, 
+                      floating[:] data_1_z, 
+                      floating[:] data_1_w,
+                      floating[:] data_2_x, #Assumes double precision input/FFTW!
+                      floating[:] data_2_y, 
+                      floating[:] data_2_z, 
+                      floating[:] data_2_w,
                       powspec_conf_file,
                       output_auto = None,
                       output_cross = None):
@@ -359,17 +420,27 @@ def compute_cross_box(double[:] data_1_x, #Assumes double precision input/FFTW!
     cdef int ndata = 2;
     cdef CATA* cat = cata_init(ndata)
     
-    cdef double* sumw2_a = numpy_to_cata(np.c_[data_1_x, data_1_y, data_1_z, data_1_w],
-                    cat,
-                    0,
-                    False,
-                    True)
-    cdef double* sumw2_b = numpy_to_cata(np.c_[data_2_x, data_2_y, data_2_z, data_2_w],
-                    cat,
-                    1,
-                    False,
-                    True)
-
+    cdef double* sumw2_a = numpy_to_cata(data_1_x, 
+                                         data_1_y, 
+                                         data_1_z,
+                                         data_1_w,
+                                         data_1_w,# dummy
+                                         data_1_w,# dummy
+                                         cat,
+                                         0, #data_id
+                                         False,
+                                         True)
+    cdef double* sumw2_b = numpy_to_cata(data_2_x, 
+                                         data_2_y, 
+                                         data_2_z,
+                                         data_2_w,
+                                         data_2_w,# dummy
+                                         data_2_w,# dummy
+                                         cat,
+                                         1, #data_id
+                                         False,
+                                         True)
+                     
 
     cdef PK* pk = compute_pk(cat, <bint> save_auto, False, argc, argv)
     pk_result = {}
@@ -408,18 +479,18 @@ def compute_cross_box(double[:] data_1_x, #Assumes double precision input/FFTW!
     return pk_result
 
 
-def compute_auto_lc(double[:] data_x, #Assumes double precision input/FFTW!
-                    double[:] data_y, 
-                    double[:] data_z, 
-                    double[:] data_wcomp,
-                    double[:] data_wfkp,
-                    double[:] data_nz,
-                    double[:] rand_x, #Assumes double precision input/FFTW!
-                    double[:] rand_y, 
-                    double[:] rand_z, 
-                    double[:] rand_wcomp,
-                    double[:] rand_wfkp,
-                    double[:] rand_nz,
+def compute_auto_lc(floating[:] data_x, #Assumes double precision input/FFTW!
+                    floating[:] data_y, 
+                    floating[:] data_z, 
+                    floating[:] data_wcomp,
+                    floating[:] data_wfkp,
+                    floating[:] data_nz,
+                    floating[:] rand_x, #Assumes double precision input/FFTW!
+                    floating[:] rand_y, 
+                    floating[:] rand_z, 
+                    floating[:] rand_wcomp,
+                    floating[:] rand_wfkp,
+                    floating[:] rand_nz,
                     powspec_conf_file,
                     output_file = None):
  
@@ -455,17 +526,27 @@ def compute_auto_lc(double[:] data_x, #Assumes double precision input/FFTW!
     cdef int i = 0
     cdef CATA* cat = cata_init(ndata)
     
-    cdef double* sumw2_dat = numpy_to_cata(np.c_[data_x, data_y, data_z, data_wcomp, data_wfkp, data_nz],
-                    cat,
-                    i,
-                    0,
-                    False)
+    cdef double* sumw2_dat = numpy_to_cata(data_x, 
+                                           data_y, 
+                                           data_z,
+                                           data_wcomp,
+                                           data_wfkp,
+                                           data_nz,
+                                           cat,
+                                           i,
+                                           0,
+                                           False)
 
-    cdef double* sumw2_ran = numpy_to_cata(np.c_[rand_x, rand_y, rand_z, rand_wcomp, rand_wfkp, rand_nz],
-                    cat,
-                    i,
-                    1,
-                    False)
+    cdef double* sumw2_ran = numpy_to_cata(rand_x, 
+                                           rand_y, 
+                                           rand_z,
+                                           rand_wcomp,
+                                           rand_wfkp,
+                                           rand_nz,
+                                           cat,
+                                           i,
+                                           1,
+                                           False)
     
     cat.alpha[i] = cat.wdata[i] / cat.wrand[i]
     # Shot noise from both data and random 
@@ -513,30 +594,30 @@ def compute_auto_lc(double[:] data_x, #Assumes double precision input/FFTW!
     
     return pk_result
 
-def compute_cross_lc(double[:] data_1_x, #Assumes double precision input/FFTW!
-                     double[:] data_1_y, 
-                     double[:] data_1_z, 
-                     double[:] data_1_wcomp,
-                     double[:] data_1_wfkp,
-                     double[:] data_1_nz,
-                     double[:] rand_1_x, #Assumes double precision input/FFTW!
-                     double[:] rand_1_y, 
-                     double[:] rand_1_z, 
-                     double[:] rand_1_wcomp,
-                     double[:] rand_1_wfkp,
-                     double[:] rand_1_nz,
-                     double[:] data_2_x, #Assumes double precision input/FFTW!
-                     double[:] data_2_y, 
-                     double[:] data_2_z, 
-                     double[:] data_2_wcomp,
-                     double[:] data_2_wfkp,
-                     double[:] data_2_nz,
-                     double[:] rand_2_x, #Assumes double precision input/FFTW!
-                     double[:] rand_2_y, 
-                     double[:] rand_2_z, 
-                     double[:] rand_2_wcomp,
-                     double[:] rand_2_wfkp,
-                     double[:] rand_2_nz,
+def compute_cross_lc(floating[:] data_1_x, #Assumes double precision input/FFTW!
+                     floating[:] data_1_y, 
+                     floating[:] data_1_z, 
+                     floating[:] data_1_wcomp,
+                     floating[:] data_1_wfkp,
+                     floating[:] data_1_nz,
+                     floating[:] rand_1_x, #Assumes double precision input/FFTW!
+                     floating[:] rand_1_y, 
+                     floating[:] rand_1_z, 
+                     floating[:] rand_1_wcomp,
+                     floating[:] rand_1_wfkp,
+                     floating[:] rand_1_nz,
+                     floating[:] data_2_x, #Assumes double precision input/FFTW!
+                     floating[:] data_2_y, 
+                     floating[:] data_2_z, 
+                     floating[:] data_2_wcomp,
+                     floating[:] data_2_wfkp,
+                     floating[:] data_2_nz,
+                     floating[:] rand_2_x, #Assumes double precision input/FFTW!
+                     floating[:] rand_2_y, 
+                     floating[:] rand_2_z, 
+                     floating[:] rand_2_wcomp,
+                     floating[:] rand_2_wfkp,
+                     floating[:] rand_2_nz,
                      powspec_conf_file,
                      output_auto = None,
                      output_cross = None):
@@ -579,17 +660,27 @@ def compute_cross_lc(double[:] data_1_x, #Assumes double precision input/FFTW!
     cdef int i = 0
     cdef CATA* cat = cata_init(ndata)
     
-    cdef double* sumw2_dat = numpy_to_cata(np.c_[data_1_x, data_1_y, data_1_z, data_1_wcomp, data_1_wfkp, data_1_nz],
-                    cat,
-                    i,
-                    0,
-                    False)
+    cdef double* sumw2_dat = numpy_to_cata(data_1_x, 
+                                           data_1_y, 
+                                           data_1_z,
+                                           data_1_wcomp,
+                                           data_1_wfkp,
+                                           data_1_nz,
+                                           cat,
+                                           i,
+                                           0,
+                                           False)
 
-    cdef double* sumw2_ran = numpy_to_cata(np.c_[rand_1_x, rand_1_y, rand_1_z, rand_1_wcomp, rand_1_wfkp, rand_1_nz],
-                    cat,
-                    i,
-                    1,
-                    False)
+    cdef double* sumw2_ran = numpy_to_cata(rand_1_x, 
+                                           rand_1_y, 
+                                           rand_1_z,
+                                           rand_1_wcomp,
+                                           rand_1_wfkp,
+                                           rand_1_nz,
+                                           cat,
+                                           i,
+                                           1,
+                                           False)
     
     cat.alpha[i] = cat.wdata[i] / cat.wrand[i]
     # Shot noise from both data and random 
@@ -612,17 +703,27 @@ def compute_cross_lc(double[:] data_1_x, #Assumes double precision input/FFTW!
     sumw2_ran[0] = 0
     sumw2_ran[1] = 0
 
-    sumw2_dat = numpy_to_cata(np.c_[data_2_x, data_2_y, data_2_z, data_2_wcomp, data_2_wfkp, data_2_nz],
-                    cat,
-                    i,
-                    0,
-                    False)
+    sumw2_dat = numpy_to_cata(data_2_x, 
+                              data_2_y, 
+                              data_2_z,
+                              data_2_wcomp,
+                              data_2_wfkp,
+                              data_2_nz,
+                              cat,
+                              i,
+                              0,
+                              False)
 
-    sumw2_ran = numpy_to_cata(np.c_[rand_2_x, rand_2_y, rand_2_z, rand_2_wcomp, rand_2_wfkp, rand_2_nz],
-                    cat,
-                    i,
-                    1,
-                    False)
+    sumw2_ran = numpy_to_cata(rand_2_x, 
+                              rand_2_y, 
+                              rand_2_z,
+                              rand_2_wcomp,
+                              rand_2_wfkp,
+                              rand_2_nz,
+                              cat,
+                              i,
+                              1,
+                              False)
     
     cat.alpha[i] = cat.wdata[i] / cat.wrand[i]
     # Shot noise from both data and random 
@@ -673,14 +774,14 @@ def compute_cross_lc(double[:] data_1_x, #Assumes double precision input/FFTW!
     
     return pk_result
 
-def compute_auto_box_rand(double[:] data_x, #Assumes double precision input/FFTW!
-                          double[:] data_y, 
-                          double[:] data_z, 
-                          double[:] data_w,
-                          double[:] rand_x, #Assumes double precision input/FFTW!
-                          double[:] rand_y, 
-                          double[:] rand_z, 
-                          double[:] rand_w,
+def compute_auto_box_rand(floating[:] data_x, #Assumes double precision input/FFTW!
+                          floating[:] data_y, 
+                          floating[:] data_z, 
+                          floating[:] data_w,
+                          floating[:] rand_x, #Assumes double precision input/FFTW!
+                          floating[:] rand_y, 
+                          floating[:] rand_z, 
+                          floating[:] rand_w,
                           powspec_conf_file,
                           output_file = None):
 
@@ -719,17 +820,27 @@ def compute_auto_box_rand(double[:] data_x, #Assumes double precision input/FFTW
     cdef CATA* cat = cata_init(ndata)
     
     
-    cdef double* sumw2_dat = numpy_to_cata(np.c_[data_x, data_y, data_z, data_w],
-                    cat,
-                    i,
-                    0,
-                    True)
+    cdef double* sumw2_dat = numpy_to_cata(data_x,
+                                           data_y,
+                                           data_z,
+                                           data_w,
+                                           data_w,
+                                           data_w,
+                                           cat,
+                                           i,
+                                           0,
+                                           True)
 
-    cdef double* sumw2_ran = numpy_to_cata(np.c_[rand_x, rand_y, rand_z, rand_w],
-                    cat,
-                    i,
-                    1,
-                    True)
+    cdef double* sumw2_ran = numpy_to_cata(rand_x,
+                                           rand_y,
+                                           rand_z,
+                                           rand_w,
+                                           rand_w,
+                                           rand_w,
+                                           cat,
+                                           i,
+                                           1,
+                                           True)
     
     cat.alpha[i] = cat.wdata[i] / cat.wrand[i]
     # Shot noise from both data and random 
@@ -774,22 +885,22 @@ def compute_auto_box_rand(double[:] data_x, #Assumes double precision input/FFTW
     
     return pk_result
 
-def compute_cross_box_rand(double[:] data_1_x, #Assumes double precision input/FFTW!
-                           double[:] data_1_y, 
-                           double[:] data_1_z, 
-                           double[:] data_1_w,
-                           double[:] rand_1_x, #Assumes double precision input/FFTW!
-                           double[:] rand_1_y, 
-                           double[:] rand_1_z, 
-                           double[:] rand_1_w,
-                           double[:] data_2_x, #Assumes double precision input/FFTW!
-                           double[:] data_2_y, 
-                           double[:] data_2_z, 
-                           double[:] data_2_w,
-                           double[:] rand_2_x, #Assumes double precision input/FFTW!
-                           double[:] rand_2_y, 
-                           double[:] rand_2_z, 
-                           double[:] rand_2_w,
+def compute_cross_box_rand(floating[:] data_1_x, #Assumes double precision input/FFTW!
+                           floating[:] data_1_y, 
+                           floating[:] data_1_z, 
+                           floating[:] data_1_w,
+                           floating[:] rand_1_x, #Assumes double precision input/FFTW!
+                           floating[:] rand_1_y, 
+                           floating[:] rand_1_z, 
+                           floating[:] rand_1_w,
+                           floating[:] data_2_x, #Assumes double precision input/FFTW!
+                           floating[:] data_2_y, 
+                           floating[:] data_2_z, 
+                           floating[:] data_2_w,
+                           floating[:] rand_2_x, #Assumes double precision input/FFTW!
+                           floating[:] rand_2_y, 
+                           floating[:] rand_2_z, 
+                           floating[:] rand_2_w,
                            powspec_conf_file,
                            output_auto = None,
                            output_cross = None):
@@ -833,17 +944,27 @@ def compute_cross_box_rand(double[:] data_1_x, #Assumes double precision input/F
     cdef CATA* cat = cata_init(ndata)
     
     
-    cdef double* sumw2_dat = numpy_to_cata(np.c_[data_1_x, data_1_y, data_1_z, data_1_w],
-                    cat,
-                    i,
-                    0,
-                    True)
+    cdef double* sumw2_dat = numpy_to_cata(data_1_x,
+                                           data_1_y,
+                                           data_1_z,
+                                           data_1_w,
+                                           data_1_w,
+                                           data_1_w,
+                                           cat,
+                                           i,
+                                           0,
+                                           True)
 
-    cdef double* sumw2_ran = numpy_to_cata(np.c_[rand_1_x, rand_1_y, rand_1_z, rand_1_w],
-                    cat,
-                    i,
-                    1,
-                    True)
+    cdef double* sumw2_ran = numpy_to_cata(rand_1_x,
+                                           rand_1_y,
+                                           rand_1_z,
+                                           rand_1_w,
+                                           rand_1_w,
+                                           rand_1_w,
+                                           cat,
+                                           i,
+                                           1,
+                                           True)
     
     cat.alpha[i] = cat.wdata[i] / cat.wrand[i]
     # Shot noise from both data and random 
@@ -861,17 +982,27 @@ def compute_cross_box_rand(double[:] data_1_x, #Assumes double precision input/F
     sumw2_ran[0] = 0
     sumw2_ran[1] = 0
 
-    sumw2_dat = numpy_to_cata(np.c_[data_2_x, data_2_y, data_2_z, data_2_w],
-                    cat,
-                    i,
-                    0,
-                    True)
+    sumw2_dat = numpy_to_cata(data_2_x,
+                              data_2_y,
+                              data_2_z,
+                              data_2_w,
+                              data_2_w,
+                              data_2_w,
+                              cat,
+                              i,
+                              0,
+                              True)
 
-    sumw2_ran = numpy_to_cata(np.c_[rand_2_x, rand_2_y, rand_2_z, rand_2_w],
-                    cat,
-                    i,
-                    1,
-                    True)
+    sumw2_ran = numpy_to_cata(rand_2_x,
+                              rand_2_y,
+                              rand_2_z,
+                              rand_2_w,
+                              rand_2_w,
+                              rand_2_w,
+                              cat,
+                              i,
+                              1,
+                              True)
 
 
     cat.alpha[i] = cat.wdata[i] / cat.wrand[i]
