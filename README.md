@@ -3,7 +3,7 @@
 This repository contains a small Cython wrapper to the original [code](https://github.com/cheng-zhao/powspec) by Cheng Zhao.
 In the current iteration, this wrapper allows to lauch (auto and cross) power spectrum computation from in-memory data in the form of numpy arrays for periodic and non-periodic (survey-like) data. Furthermore, it expands on the original code's capability by allowing the use of randoms for simulation boxes too. This is useful when computing post-BAO reconstruction power spectra where shifted randoms are required.
 
-So far *only the `float64` version has been implemented*. I have not done many tests but the ones performed show equivalent results to those obtained by directly invoking the C code. Using randoms with boxes was tested with uniform randoms 10x the size of the catalog and show agreement with the C code's periodic box data for the most part (small scales are slightly biased). 
+I have not done many tests but the ones performed show equivalent results to those obtained by directly invoking the C code. Using randoms with boxes was tested with uniform randoms 10x the size of the catalog and show agreement with the C code's periodic box data for the most part (small scales are slightly biased). 
 
 ## Use of the Python wrapper
 
