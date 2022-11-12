@@ -75,7 +75,8 @@ PK *compute_pk(CATA *cata, bool save_out, bool has_randoms, int argc, char *argv
      P_EXT("failed to write the output to file.\n");
      conf_destroy(conf);
      mesh_destroy(mesh); powspec_destroy(pk);
-     return POWSPEC_ERR_SAVE;
+     return NULL;
+
    }
 
   conf_destroy(conf);
