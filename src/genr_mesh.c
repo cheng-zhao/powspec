@@ -913,6 +913,7 @@ MESH *genr_mesh(const CONF *conf, CATA *cat) {
       double vol = mesh->bsize[0] * mesh->bsize[1] * mesh->bsize[2];
       cat->shot[i] = vol / cat->wdata[i];
       cat->norm[i] = cat->wdata[i] * cat->wdata[i] / vol;
+      cat->shot[i] -= conf->has_randoms ? vol / cat->wrand[i] : 0; 
       //printf("%lf %lf %lf %lf", cat->shot[i], cat->norm[i], cat->num, cat->wdata[i]);
     }
   }

@@ -4,7 +4,7 @@ import proplot as pplt
 import numpy as np
 import sys
 sys.path.append("/global/u1/d/dforero/codes/powspec_py/powspec/")
-from pypowspec import compute_auto_box_rand, compute_cross_box_rand
+from pypowspec import compute_auto_box_rand, compute_cross_box_rand, compute_auto_box
 
 
 def hankel_sum(k, P, smooth_a, sarr, ell):
