@@ -8,7 +8,7 @@ from pypowspec import compute_auto_box, compute_cross_box
 
 try:
     import pandas as pd
-    test_fname = "/global/project/projectdirs/desi/mocks/UNIT/HOD_Shadab/HOD_boxes/redshift0.9873/UNIT_DESI_Shadab_HOD_snap97_ELG_v0.txt"
+    test_fname = "/global/cfs/cdirs/desi/mocks/UNIT/HOD_Shadab/HOD_boxes/redshift0.9873/UNIT_DESI_Shadab_HOD_snap97_ELG_v0.txt"
     data = pd.read_csv(test_fname, usecols = (0,1,3), engine='c', delim_whitespace=True, names = ['x', 'y', 'zrsd']).values
 except:
     print("WARNING: Read catalog failed, testing with uniform random.", flush=True)
