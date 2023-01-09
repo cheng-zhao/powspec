@@ -2304,6 +2304,7 @@ static const char __pyx_k_pyx_checksum[] = "__pyx_checksum";
 static const char __pyx_k_rand_1_wcomp[] = "rand_1_wcomp";
 static const char __pyx_k_rand_2_wcomp[] = "rand_2_wcomp";
 static const char __pyx_k_stringsource[] = "stringsource";
+static const char __pyx_k_auto_test_out[] = "--auto=test.out";
 static const char __pyx_k_normalisation[] = "normalisation";
 static const char __pyx_k_pyx_getbuffer[] = "__pyx_getbuffer";
 static const char __pyx_k_reduce_cython[] = "__reduce_cython__";
@@ -2313,6 +2314,7 @@ static const char __pyx_k_View_MemoryView[] = "View.MemoryView";
 static const char __pyx_k_allocate_buffer[] = "allocate_buffer";
 static const char __pyx_k_auto_multipoles[] = "auto_multipoles";
 static const char __pyx_k_compute_auto_lc[] = "compute_auto_lc";
+static const char __pyx_k_cross_cross_out[] = "--cross=cross.out";
 static const char __pyx_k_dtype_is_object[] = "dtype_is_object";
 static const char __pyx_k_pyx_PickleError[] = "__pyx_PickleError";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
@@ -2326,14 +2328,12 @@ static const char __pyx_k_pyx_unpickle_Enum[] = "__pyx_unpickle_Enum";
 static const char __pyx_k_src_pypowspec_pyx[] = "src/pypowspec.pyx";
 static const char __pyx_k_test_output_bytes[] = "test_output_bytes";
 static const char __pyx_k_auto_output_string[] = "auto_output_string";
-static const char __pyx_k_auto_test_test_out[] = "--auto=test/test.out";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_cross_output_bytes[] = "cross_output_bytes";
 static const char __pyx_k_strided_and_direct[] = "<strided and direct>";
 static const char __pyx_k_test_output_string[] = "test_output_string";
 static const char __pyx_k_cross_output_string[] = "cross_output_string";
 static const char __pyx_k_pystring_to_cstring[] = "pystring_to_cstring";
-static const char __pyx_k_cross_test_cross_out[] = "--cross=test/cross.out";
 static const char __pyx_k_strided_and_indirect[] = "<strided and indirect>";
 static const char __pyx_k_compute_auto_box_rand[] = "compute_auto_box_rand";
 static const char __pyx_k_contiguous_and_direct[] = "<contiguous and direct>";
@@ -2343,11 +2343,11 @@ static const char __pyx_k_MemoryView_of_r_at_0x_x[] = "<MemoryView of %r at 0x%x
 static const char __pyx_k_contiguous_and_indirect[] = "<contiguous and indirect>";
 static const char __pyx_k_Cannot_index_with_type_s[] = "Cannot index with type '%s'";
 static const char __pyx_k_Invalid_shape_in_axis_d_d[] = "Invalid shape in axis %d: %d.";
+static const char __pyx_k_auto_auto_1_out_auto_2_out[] = "--auto=[auto_1.out,auto_2.out]";
 static const char __pyx_k_No_matching_signature_found[] = "No matching signature found";
 static const char __pyx_k_itemsize_0_for_cython_array[] = "itemsize <= 0 for cython.array";
 static const char __pyx_k_Could_not_create_PK_structure[] = "Could not create PK structure.";
 static const char __pyx_k_unable_to_allocate_array_data[] = "unable to allocate array data.";
-static const char __pyx_k_auto_test_auto_1_out_test_auto[] = "--auto=[test/auto_1.out,test/auto_2.out]";
 static const char __pyx_k_strided_and_direct_or_indirect[] = "<strided and direct or indirect>";
 static const char __pyx_k_Buffer_view_does_not_expose_stri[] = "Buffer view does not expose strides";
 static const char __pyx_k_Can_only_create_a_buffer_that_is[] = "Can only create a buffer that is contiguous in memory.";
@@ -2404,12 +2404,12 @@ static PyObject *__pyx_n_s_args;
 static PyObject *__pyx_n_s_argv;
 static PyObject *__pyx_kp_u_auto;
 static PyObject *__pyx_kp_u_auto_2;
+static PyObject *__pyx_kp_u_auto_auto_1_out_auto_2_out;
 static PyObject *__pyx_n_u_auto_multipoles;
 static PyObject *__pyx_n_s_auto_output;
 static PyObject *__pyx_n_s_auto_output_bytes;
 static PyObject *__pyx_n_s_auto_output_string;
-static PyObject *__pyx_kp_u_auto_test_auto_1_out_test_auto;
-static PyObject *__pyx_kp_u_auto_test_test_out;
+static PyObject *__pyx_kp_u_auto_test_out;
 static PyObject *__pyx_n_s_base;
 static PyObject *__pyx_n_s_c;
 static PyObject *__pyx_n_u_c;
@@ -2429,11 +2429,11 @@ static PyObject *__pyx_n_s_conf_string;
 static PyObject *__pyx_kp_s_contiguous_and_direct;
 static PyObject *__pyx_kp_s_contiguous_and_indirect;
 static PyObject *__pyx_kp_u_cross;
+static PyObject *__pyx_kp_u_cross_cross_out;
 static PyObject *__pyx_n_u_cross_multipoles;
 static PyObject *__pyx_n_s_cross_output;
 static PyObject *__pyx_n_s_cross_output_bytes;
 static PyObject *__pyx_n_s_cross_output_string;
-static PyObject *__pyx_kp_u_cross_test_cross_out;
 static PyObject *__pyx_n_s_cstring;
 static PyObject *__pyx_n_s_data_1_nz;
 static PyObject *__pyx_n_s_data_1_w;
@@ -5661,7 +5661,7 @@ static PyObject *__pyx_pf_9pypowspec_14compute_auto_box(CYTHON_UNUSED PyObject *
  *     save_out = output_file is not None
  *     if not save_out:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  */
   __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_save_out); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 299, __pyx_L1_error)
   __pyx_t_3 = ((!__pyx_t_1) != 0);
@@ -5670,25 +5670,25 @@ static PyObject *__pyx_pf_9pypowspec_14compute_auto_box(CYTHON_UNUSED PyObject *
     /* "pypowspec.pyx":301
  *     if not save_out:
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"             # <<<<<<<<<<<<<<
+ *         test_output = "--auto=test.out"             # <<<<<<<<<<<<<<
  *     else:
  *         test_output = f"--auto={output_file}"
  */
-    __Pyx_INCREF(__pyx_kp_u_auto_test_test_out);
-    __pyx_v_test_output = __pyx_kp_u_auto_test_test_out;
+    __Pyx_INCREF(__pyx_kp_u_auto_test_out);
+    __pyx_v_test_output = __pyx_kp_u_auto_test_out;
 
     /* "pypowspec.pyx":299
  * 
  *     save_out = output_file is not None
  *     if not save_out:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  */
     goto __pyx_L3;
   }
 
   /* "pypowspec.pyx":303
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  *     else:
  *         test_output = f"--auto={output_file}"             # <<<<<<<<<<<<<<
  *     test_output_bytes = test_output.encode('utf-8') + b'\x00'
@@ -6615,7 +6615,7 @@ static PyObject *__pyx_pf_9pypowspec_16compute_auto_box(CYTHON_UNUSED PyObject *
  *     save_out = output_file is not None
  *     if not save_out:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  */
   __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_save_out); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 299, __pyx_L1_error)
   __pyx_t_3 = ((!__pyx_t_1) != 0);
@@ -6624,25 +6624,25 @@ static PyObject *__pyx_pf_9pypowspec_16compute_auto_box(CYTHON_UNUSED PyObject *
     /* "pypowspec.pyx":301
  *     if not save_out:
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"             # <<<<<<<<<<<<<<
+ *         test_output = "--auto=test.out"             # <<<<<<<<<<<<<<
  *     else:
  *         test_output = f"--auto={output_file}"
  */
-    __Pyx_INCREF(__pyx_kp_u_auto_test_test_out);
-    __pyx_v_test_output = __pyx_kp_u_auto_test_test_out;
+    __Pyx_INCREF(__pyx_kp_u_auto_test_out);
+    __pyx_v_test_output = __pyx_kp_u_auto_test_out;
 
     /* "pypowspec.pyx":299
  * 
  *     save_out = output_file is not None
  *     if not save_out:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  */
     goto __pyx_L3;
   }
 
   /* "pypowspec.pyx":303
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  *     else:
  *         test_output = f"--auto={output_file}"             # <<<<<<<<<<<<<<
  *     test_output_bytes = test_output.encode('utf-8') + b'\x00'
@@ -8181,7 +8181,7 @@ static PyObject *__pyx_pf_9pypowspec_20compute_cross_box(CYTHON_UNUSED PyObject 
  *     save_auto = output_auto is not None
  *     if not save_auto:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
  */
   __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_save_auto); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 389, __pyx_L1_error)
   __pyx_t_3 = ((!__pyx_t_1) != 0);
@@ -8190,35 +8190,35 @@ static PyObject *__pyx_pf_9pypowspec_20compute_cross_box(CYTHON_UNUSED PyObject 
     /* "pypowspec.pyx":391
  *     if not save_auto:
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"             # <<<<<<<<<<<<<<
- *         cross_output = "--cross=test/cross.out"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"             # <<<<<<<<<<<<<<
+ *         cross_output = "--cross=cross.out"
  *     else:
  */
-    __Pyx_INCREF(__pyx_kp_u_auto_test_auto_1_out_test_auto);
-    __pyx_v_auto_output = __pyx_kp_u_auto_test_auto_1_out_test_auto;
+    __Pyx_INCREF(__pyx_kp_u_auto_auto_1_out_auto_2_out);
+    __pyx_v_auto_output = __pyx_kp_u_auto_auto_1_out_auto_2_out;
 
     /* "pypowspec.pyx":392
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
- *         cross_output = "--cross=test/cross.out"             # <<<<<<<<<<<<<<
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
+ *         cross_output = "--cross=cross.out"             # <<<<<<<<<<<<<<
  *     else:
  *         auto_output = f"--auto=[{','.join(output_auto)}]"
  */
-    __Pyx_INCREF(__pyx_kp_u_cross_test_cross_out);
-    __pyx_v_cross_output = __pyx_kp_u_cross_test_cross_out;
+    __Pyx_INCREF(__pyx_kp_u_cross_cross_out);
+    __pyx_v_cross_output = __pyx_kp_u_cross_cross_out;
 
     /* "pypowspec.pyx":389
  * 
  *     save_auto = output_auto is not None
  *     if not save_auto:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
  */
     goto __pyx_L3;
   }
 
   /* "pypowspec.pyx":394
- *         cross_output = "--cross=test/cross.out"
+ *         cross_output = "--cross=cross.out"
  *     else:
  *         auto_output = f"--auto=[{','.join(output_auto)}]"             # <<<<<<<<<<<<<<
  *         cross_output = f"--cross={output_cross}"
@@ -9450,7 +9450,7 @@ static PyObject *__pyx_pf_9pypowspec_22compute_cross_box(CYTHON_UNUSED PyObject 
  *     save_auto = output_auto is not None
  *     if not save_auto:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
  */
   __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_save_auto); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 389, __pyx_L1_error)
   __pyx_t_3 = ((!__pyx_t_1) != 0);
@@ -9459,35 +9459,35 @@ static PyObject *__pyx_pf_9pypowspec_22compute_cross_box(CYTHON_UNUSED PyObject 
     /* "pypowspec.pyx":391
  *     if not save_auto:
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"             # <<<<<<<<<<<<<<
- *         cross_output = "--cross=test/cross.out"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"             # <<<<<<<<<<<<<<
+ *         cross_output = "--cross=cross.out"
  *     else:
  */
-    __Pyx_INCREF(__pyx_kp_u_auto_test_auto_1_out_test_auto);
-    __pyx_v_auto_output = __pyx_kp_u_auto_test_auto_1_out_test_auto;
+    __Pyx_INCREF(__pyx_kp_u_auto_auto_1_out_auto_2_out);
+    __pyx_v_auto_output = __pyx_kp_u_auto_auto_1_out_auto_2_out;
 
     /* "pypowspec.pyx":392
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
- *         cross_output = "--cross=test/cross.out"             # <<<<<<<<<<<<<<
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
+ *         cross_output = "--cross=cross.out"             # <<<<<<<<<<<<<<
  *     else:
  *         auto_output = f"--auto=[{','.join(output_auto)}]"
  */
-    __Pyx_INCREF(__pyx_kp_u_cross_test_cross_out);
-    __pyx_v_cross_output = __pyx_kp_u_cross_test_cross_out;
+    __Pyx_INCREF(__pyx_kp_u_cross_cross_out);
+    __pyx_v_cross_output = __pyx_kp_u_cross_cross_out;
 
     /* "pypowspec.pyx":389
  * 
  *     save_auto = output_auto is not None
  *     if not save_auto:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
  */
     goto __pyx_L3;
   }
 
   /* "pypowspec.pyx":394
- *         cross_output = "--cross=test/cross.out"
+ *         cross_output = "--cross=cross.out"
  *     else:
  *         auto_output = f"--auto=[{','.join(output_auto)}]"             # <<<<<<<<<<<<<<
  *         cross_output = f"--cross={output_cross}"
@@ -11272,7 +11272,7 @@ static PyObject *__pyx_pf_9pypowspec_26compute_auto_lc(CYTHON_UNUSED PyObject *_
  *     save_out = output_file is not None
  *     if not save_out:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  */
   __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_save_out); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 501, __pyx_L1_error)
   __pyx_t_3 = ((!__pyx_t_1) != 0);
@@ -11281,25 +11281,25 @@ static PyObject *__pyx_pf_9pypowspec_26compute_auto_lc(CYTHON_UNUSED PyObject *_
     /* "pypowspec.pyx":503
  *     if not save_out:
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"             # <<<<<<<<<<<<<<
+ *         test_output = "--auto=test.out"             # <<<<<<<<<<<<<<
  *     else:
  *         test_output = f"--auto={output_file}"
  */
-    __Pyx_INCREF(__pyx_kp_u_auto_test_test_out);
-    __pyx_v_test_output = __pyx_kp_u_auto_test_test_out;
+    __Pyx_INCREF(__pyx_kp_u_auto_test_out);
+    __pyx_v_test_output = __pyx_kp_u_auto_test_out;
 
     /* "pypowspec.pyx":501
  * 
  *     save_out = output_file is not None
  *     if not save_out:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  */
     goto __pyx_L3;
   }
 
   /* "pypowspec.pyx":505
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  *     else:
  *         test_output = f"--auto={output_file}"             # <<<<<<<<<<<<<<
  *     test_output_bytes = test_output.encode('utf-8') + b'\x00'
@@ -12350,7 +12350,7 @@ static PyObject *__pyx_pf_9pypowspec_28compute_auto_lc(CYTHON_UNUSED PyObject *_
  *     save_out = output_file is not None
  *     if not save_out:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  */
   __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_save_out); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 501, __pyx_L1_error)
   __pyx_t_3 = ((!__pyx_t_1) != 0);
@@ -12359,25 +12359,25 @@ static PyObject *__pyx_pf_9pypowspec_28compute_auto_lc(CYTHON_UNUSED PyObject *_
     /* "pypowspec.pyx":503
  *     if not save_out:
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"             # <<<<<<<<<<<<<<
+ *         test_output = "--auto=test.out"             # <<<<<<<<<<<<<<
  *     else:
  *         test_output = f"--auto={output_file}"
  */
-    __Pyx_INCREF(__pyx_kp_u_auto_test_test_out);
-    __pyx_v_test_output = __pyx_kp_u_auto_test_test_out;
+    __Pyx_INCREF(__pyx_kp_u_auto_test_out);
+    __pyx_v_test_output = __pyx_kp_u_auto_test_out;
 
     /* "pypowspec.pyx":501
  * 
  *     save_out = output_file is not None
  *     if not save_out:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  */
     goto __pyx_L3;
   }
 
   /* "pypowspec.pyx":505
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  *     else:
  *         test_output = f"--auto={output_file}"             # <<<<<<<<<<<<<<
  *     test_output_bytes = test_output.encode('utf-8') + b'\x00'
@@ -14128,7 +14128,7 @@ static PyObject *__pyx_pf_9pypowspec_32compute_cross_lc(CYTHON_UNUSED PyObject *
  *     save_auto = output_auto is not None
  *     if not save_auto:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
  */
   __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_save_auto); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 629, __pyx_L1_error)
   __pyx_t_3 = ((!__pyx_t_1) != 0);
@@ -14137,35 +14137,35 @@ static PyObject *__pyx_pf_9pypowspec_32compute_cross_lc(CYTHON_UNUSED PyObject *
     /* "pypowspec.pyx":631
  *     if not save_auto:
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"             # <<<<<<<<<<<<<<
- *         cross_output = "--cross=test/cross.out"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"             # <<<<<<<<<<<<<<
+ *         cross_output = "--cross=cross.out"
  *     else:
  */
-    __Pyx_INCREF(__pyx_kp_u_auto_test_auto_1_out_test_auto);
-    __pyx_v_auto_output = __pyx_kp_u_auto_test_auto_1_out_test_auto;
+    __Pyx_INCREF(__pyx_kp_u_auto_auto_1_out_auto_2_out);
+    __pyx_v_auto_output = __pyx_kp_u_auto_auto_1_out_auto_2_out;
 
     /* "pypowspec.pyx":632
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
- *         cross_output = "--cross=test/cross.out"             # <<<<<<<<<<<<<<
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
+ *         cross_output = "--cross=cross.out"             # <<<<<<<<<<<<<<
  *     else:
  *         auto_output = f"--auto=[{','.join(output_auto)}]"
  */
-    __Pyx_INCREF(__pyx_kp_u_cross_test_cross_out);
-    __pyx_v_cross_output = __pyx_kp_u_cross_test_cross_out;
+    __Pyx_INCREF(__pyx_kp_u_cross_cross_out);
+    __pyx_v_cross_output = __pyx_kp_u_cross_cross_out;
 
     /* "pypowspec.pyx":629
  * 
  *     save_auto = output_auto is not None
  *     if not save_auto:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
  */
     goto __pyx_L3;
   }
 
   /* "pypowspec.pyx":634
- *         cross_output = "--cross=test/cross.out"
+ *         cross_output = "--cross=cross.out"
  *     else:
  *         auto_output = f"--auto=[{','.join(output_auto)}]"             # <<<<<<<<<<<<<<
  *         cross_output = f"--cross={output_cross}"
@@ -15847,7 +15847,7 @@ static PyObject *__pyx_pf_9pypowspec_34compute_cross_lc(CYTHON_UNUSED PyObject *
  *     save_auto = output_auto is not None
  *     if not save_auto:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
  */
   __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_save_auto); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 629, __pyx_L1_error)
   __pyx_t_3 = ((!__pyx_t_1) != 0);
@@ -15856,35 +15856,35 @@ static PyObject *__pyx_pf_9pypowspec_34compute_cross_lc(CYTHON_UNUSED PyObject *
     /* "pypowspec.pyx":631
  *     if not save_auto:
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"             # <<<<<<<<<<<<<<
- *         cross_output = "--cross=test/cross.out"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"             # <<<<<<<<<<<<<<
+ *         cross_output = "--cross=cross.out"
  *     else:
  */
-    __Pyx_INCREF(__pyx_kp_u_auto_test_auto_1_out_test_auto);
-    __pyx_v_auto_output = __pyx_kp_u_auto_test_auto_1_out_test_auto;
+    __Pyx_INCREF(__pyx_kp_u_auto_auto_1_out_auto_2_out);
+    __pyx_v_auto_output = __pyx_kp_u_auto_auto_1_out_auto_2_out;
 
     /* "pypowspec.pyx":632
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
- *         cross_output = "--cross=test/cross.out"             # <<<<<<<<<<<<<<
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
+ *         cross_output = "--cross=cross.out"             # <<<<<<<<<<<<<<
  *     else:
  *         auto_output = f"--auto=[{','.join(output_auto)}]"
  */
-    __Pyx_INCREF(__pyx_kp_u_cross_test_cross_out);
-    __pyx_v_cross_output = __pyx_kp_u_cross_test_cross_out;
+    __Pyx_INCREF(__pyx_kp_u_cross_cross_out);
+    __pyx_v_cross_output = __pyx_kp_u_cross_cross_out;
 
     /* "pypowspec.pyx":629
  * 
  *     save_auto = output_auto is not None
  *     if not save_auto:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
  */
     goto __pyx_L3;
   }
 
   /* "pypowspec.pyx":634
- *         cross_output = "--cross=test/cross.out"
+ *         cross_output = "--cross=cross.out"
  *     else:
  *         auto_output = f"--auto=[{','.join(output_auto)}]"             # <<<<<<<<<<<<<<
  *         cross_output = f"--cross={output_cross}"
@@ -17898,7 +17898,7 @@ static PyObject *__pyx_pf_9pypowspec_38compute_auto_box_rand(CYTHON_UNUSED PyObj
  *     save_out = output_file is not None
  *     if not save_out:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  */
   __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_save_out); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 794, __pyx_L1_error)
   __pyx_t_3 = ((!__pyx_t_1) != 0);
@@ -17907,25 +17907,25 @@ static PyObject *__pyx_pf_9pypowspec_38compute_auto_box_rand(CYTHON_UNUSED PyObj
     /* "pypowspec.pyx":796
  *     if not save_out:
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"             # <<<<<<<<<<<<<<
+ *         test_output = "--auto=test.out"             # <<<<<<<<<<<<<<
  *     else:
  *         test_output = f"--auto={output_file}"
  */
-    __Pyx_INCREF(__pyx_kp_u_auto_test_test_out);
-    __pyx_v_test_output = __pyx_kp_u_auto_test_test_out;
+    __Pyx_INCREF(__pyx_kp_u_auto_test_out);
+    __pyx_v_test_output = __pyx_kp_u_auto_test_out;
 
     /* "pypowspec.pyx":794
  * 
  *     save_out = output_file is not None
  *     if not save_out:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  */
     goto __pyx_L3;
   }
 
   /* "pypowspec.pyx":798
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  *     else:
  *         test_output = f"--auto={output_file}"             # <<<<<<<<<<<<<<
  *     test_output_bytes = test_output.encode('utf-8') + b'\x00'
@@ -18928,7 +18928,7 @@ static PyObject *__pyx_pf_9pypowspec_40compute_auto_box_rand(CYTHON_UNUSED PyObj
  *     save_out = output_file is not None
  *     if not save_out:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  */
   __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_save_out); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 794, __pyx_L1_error)
   __pyx_t_3 = ((!__pyx_t_1) != 0);
@@ -18937,25 +18937,25 @@ static PyObject *__pyx_pf_9pypowspec_40compute_auto_box_rand(CYTHON_UNUSED PyObj
     /* "pypowspec.pyx":796
  *     if not save_out:
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"             # <<<<<<<<<<<<<<
+ *         test_output = "--auto=test.out"             # <<<<<<<<<<<<<<
  *     else:
  *         test_output = f"--auto={output_file}"
  */
-    __Pyx_INCREF(__pyx_kp_u_auto_test_test_out);
-    __pyx_v_test_output = __pyx_kp_u_auto_test_test_out;
+    __Pyx_INCREF(__pyx_kp_u_auto_test_out);
+    __pyx_v_test_output = __pyx_kp_u_auto_test_out;
 
     /* "pypowspec.pyx":794
  * 
  *     save_out = output_file is not None
  *     if not save_out:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  */
     goto __pyx_L3;
   }
 
   /* "pypowspec.pyx":798
- *         test_output = "--auto=test/test.out"
+ *         test_output = "--auto=test.out"
  *     else:
  *         test_output = f"--auto={output_file}"             # <<<<<<<<<<<<<<
  *     test_output_bytes = test_output.encode('utf-8') + b'\x00'
@@ -20614,7 +20614,7 @@ static PyObject *__pyx_pf_9pypowspec_44compute_cross_box_rand(CYTHON_UNUSED PyOb
  *     save_auto = output_auto is not None
  *     if not save_auto:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
  */
   __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_save_auto); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 915, __pyx_L1_error)
   __pyx_t_3 = ((!__pyx_t_1) != 0);
@@ -20623,35 +20623,35 @@ static PyObject *__pyx_pf_9pypowspec_44compute_cross_box_rand(CYTHON_UNUSED PyOb
     /* "pypowspec.pyx":917
  *     if not save_auto:
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"             # <<<<<<<<<<<<<<
- *         cross_output = "--cross=test/cross.out"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"             # <<<<<<<<<<<<<<
+ *         cross_output = "--cross=cross.out"
  *     else:
  */
-    __Pyx_INCREF(__pyx_kp_u_auto_test_auto_1_out_test_auto);
-    __pyx_v_auto_output = __pyx_kp_u_auto_test_auto_1_out_test_auto;
+    __Pyx_INCREF(__pyx_kp_u_auto_auto_1_out_auto_2_out);
+    __pyx_v_auto_output = __pyx_kp_u_auto_auto_1_out_auto_2_out;
 
     /* "pypowspec.pyx":918
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
- *         cross_output = "--cross=test/cross.out"             # <<<<<<<<<<<<<<
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
+ *         cross_output = "--cross=cross.out"             # <<<<<<<<<<<<<<
  *     else:
  *         auto_output = f"--auto=[{','.join(output_auto)}]"
  */
-    __Pyx_INCREF(__pyx_kp_u_cross_test_cross_out);
-    __pyx_v_cross_output = __pyx_kp_u_cross_test_cross_out;
+    __Pyx_INCREF(__pyx_kp_u_cross_cross_out);
+    __pyx_v_cross_output = __pyx_kp_u_cross_cross_out;
 
     /* "pypowspec.pyx":915
  * 
  *     save_auto = output_auto is not None
  *     if not save_auto:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
  */
     goto __pyx_L3;
   }
 
   /* "pypowspec.pyx":920
- *         cross_output = "--cross=test/cross.out"
+ *         cross_output = "--cross=cross.out"
  *     else:
  *         auto_output = f"--auto=[{','.join(output_auto)}]"             # <<<<<<<<<<<<<<
  *         cross_output = f"--cross={output_cross}"
@@ -22111,7 +22111,7 @@ static PyObject *__pyx_pf_9pypowspec_46compute_cross_box_rand(CYTHON_UNUSED PyOb
  *     save_auto = output_auto is not None
  *     if not save_auto:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
  */
   __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_save_auto); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 915, __pyx_L1_error)
   __pyx_t_3 = ((!__pyx_t_1) != 0);
@@ -22120,35 +22120,35 @@ static PyObject *__pyx_pf_9pypowspec_46compute_cross_box_rand(CYTHON_UNUSED PyOb
     /* "pypowspec.pyx":917
  *     if not save_auto:
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"             # <<<<<<<<<<<<<<
- *         cross_output = "--cross=test/cross.out"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"             # <<<<<<<<<<<<<<
+ *         cross_output = "--cross=cross.out"
  *     else:
  */
-    __Pyx_INCREF(__pyx_kp_u_auto_test_auto_1_out_test_auto);
-    __pyx_v_auto_output = __pyx_kp_u_auto_test_auto_1_out_test_auto;
+    __Pyx_INCREF(__pyx_kp_u_auto_auto_1_out_auto_2_out);
+    __pyx_v_auto_output = __pyx_kp_u_auto_auto_1_out_auto_2_out;
 
     /* "pypowspec.pyx":918
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
- *         cross_output = "--cross=test/cross.out"             # <<<<<<<<<<<<<<
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
+ *         cross_output = "--cross=cross.out"             # <<<<<<<<<<<<<<
  *     else:
  *         auto_output = f"--auto=[{','.join(output_auto)}]"
  */
-    __Pyx_INCREF(__pyx_kp_u_cross_test_cross_out);
-    __pyx_v_cross_output = __pyx_kp_u_cross_test_cross_out;
+    __Pyx_INCREF(__pyx_kp_u_cross_cross_out);
+    __pyx_v_cross_output = __pyx_kp_u_cross_cross_out;
 
     /* "pypowspec.pyx":915
  * 
  *     save_auto = output_auto is not None
  *     if not save_auto:             # <<<<<<<<<<<<<<
  *         # Define dummy names for IO so conf does not crash
- *         auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
+ *         auto_output = "--auto=[auto_1.out,auto_2.out]"
  */
     goto __pyx_L3;
   }
 
   /* "pypowspec.pyx":920
- *         cross_output = "--cross=test/cross.out"
+ *         cross_output = "--cross=cross.out"
  *     else:
  *         auto_output = f"--auto=[{','.join(output_auto)}]"             # <<<<<<<<<<<<<<
  *         cross_output = f"--cross={output_cross}"
@@ -37055,12 +37055,12 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_argv, __pyx_k_argv, sizeof(__pyx_k_argv), 0, 0, 1, 1},
   {&__pyx_kp_u_auto, __pyx_k_auto, sizeof(__pyx_k_auto), 0, 1, 0, 0},
   {&__pyx_kp_u_auto_2, __pyx_k_auto_2, sizeof(__pyx_k_auto_2), 0, 1, 0, 0},
+  {&__pyx_kp_u_auto_auto_1_out_auto_2_out, __pyx_k_auto_auto_1_out_auto_2_out, sizeof(__pyx_k_auto_auto_1_out_auto_2_out), 0, 1, 0, 0},
   {&__pyx_n_u_auto_multipoles, __pyx_k_auto_multipoles, sizeof(__pyx_k_auto_multipoles), 0, 1, 0, 1},
   {&__pyx_n_s_auto_output, __pyx_k_auto_output, sizeof(__pyx_k_auto_output), 0, 0, 1, 1},
   {&__pyx_n_s_auto_output_bytes, __pyx_k_auto_output_bytes, sizeof(__pyx_k_auto_output_bytes), 0, 0, 1, 1},
   {&__pyx_n_s_auto_output_string, __pyx_k_auto_output_string, sizeof(__pyx_k_auto_output_string), 0, 0, 1, 1},
-  {&__pyx_kp_u_auto_test_auto_1_out_test_auto, __pyx_k_auto_test_auto_1_out_test_auto, sizeof(__pyx_k_auto_test_auto_1_out_test_auto), 0, 1, 0, 0},
-  {&__pyx_kp_u_auto_test_test_out, __pyx_k_auto_test_test_out, sizeof(__pyx_k_auto_test_test_out), 0, 1, 0, 0},
+  {&__pyx_kp_u_auto_test_out, __pyx_k_auto_test_out, sizeof(__pyx_k_auto_test_out), 0, 1, 0, 0},
   {&__pyx_n_s_base, __pyx_k_base, sizeof(__pyx_k_base), 0, 0, 1, 1},
   {&__pyx_n_s_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 0, 1, 1},
   {&__pyx_n_u_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 1, 0, 1},
@@ -37080,11 +37080,11 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_contiguous_and_direct, __pyx_k_contiguous_and_direct, sizeof(__pyx_k_contiguous_and_direct), 0, 0, 1, 0},
   {&__pyx_kp_s_contiguous_and_indirect, __pyx_k_contiguous_and_indirect, sizeof(__pyx_k_contiguous_and_indirect), 0, 0, 1, 0},
   {&__pyx_kp_u_cross, __pyx_k_cross, sizeof(__pyx_k_cross), 0, 1, 0, 0},
+  {&__pyx_kp_u_cross_cross_out, __pyx_k_cross_cross_out, sizeof(__pyx_k_cross_cross_out), 0, 1, 0, 0},
   {&__pyx_n_u_cross_multipoles, __pyx_k_cross_multipoles, sizeof(__pyx_k_cross_multipoles), 0, 1, 0, 1},
   {&__pyx_n_s_cross_output, __pyx_k_cross_output, sizeof(__pyx_k_cross_output), 0, 0, 1, 1},
   {&__pyx_n_s_cross_output_bytes, __pyx_k_cross_output_bytes, sizeof(__pyx_k_cross_output_bytes), 0, 0, 1, 1},
   {&__pyx_n_s_cross_output_string, __pyx_k_cross_output_string, sizeof(__pyx_k_cross_output_string), 0, 0, 1, 1},
-  {&__pyx_kp_u_cross_test_cross_out, __pyx_k_cross_test_cross_out, sizeof(__pyx_k_cross_test_cross_out), 0, 1, 0, 0},
   {&__pyx_n_s_cstring, __pyx_k_cstring, sizeof(__pyx_k_cstring), 0, 0, 1, 1},
   {&__pyx_n_s_data_1_nz, __pyx_k_data_1_nz, sizeof(__pyx_k_data_1_nz), 0, 0, 1, 1},
   {&__pyx_n_s_data_1_w, __pyx_k_data_1_w, sizeof(__pyx_k_data_1_w), 0, 0, 1, 1},

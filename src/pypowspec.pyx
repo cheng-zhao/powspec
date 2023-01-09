@@ -298,7 +298,7 @@ def compute_auto_box(floating[:] data_x, #Assumes double precision input/FFTW!
     save_out = output_file is not None
     if not save_out:
         # Define dummy names for IO so conf does not crash
-        test_output = "--auto=test/test.out"
+        test_output = "--auto=test.out"
     else:
         test_output = f"--auto={output_file}"
     test_output_bytes = test_output.encode('utf-8') + b'\x00'
@@ -388,8 +388,8 @@ def compute_cross_box(floating[:] data_1_x, #Assumes double precision input/FFTW
     save_auto = output_auto is not None
     if not save_auto:
         # Define dummy names for IO so conf does not crash
-        auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
-        cross_output = "--cross=test/cross.out"
+        auto_output = "--auto=[auto_1.out,auto_2.out]"
+        cross_output = "--cross=cross.out"
     else:
         auto_output = f"--auto=[{','.join(output_auto)}]"
         cross_output = f"--cross={output_cross}"
@@ -500,7 +500,7 @@ def compute_auto_lc(floating[:] data_x, #Assumes double precision input/FFTW!
     save_out = output_file is not None
     if not save_out:
         # Define dummy names for IO so conf does not crash
-        test_output = "--auto=test/test.out"
+        test_output = "--auto=test.out"
     else:
         test_output = f"--auto={output_file}"
     test_output_bytes = test_output.encode('utf-8') + b'\x00'
@@ -628,8 +628,8 @@ def compute_cross_lc(floating[:] data_1_x, #Assumes double precision input/FFTW!
     save_auto = output_auto is not None
     if not save_auto:
         # Define dummy names for IO so conf does not crash
-        auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
-        cross_output = "--cross=test/cross.out"
+        auto_output = "--auto=[auto_1.out,auto_2.out]"
+        cross_output = "--cross=cross.out"
     else:
         auto_output = f"--auto=[{','.join(output_auto)}]"
         cross_output = f"--cross={output_cross}"
@@ -793,7 +793,7 @@ def compute_auto_box_rand(floating[:] data_x, #Assumes double precision input/FF
     save_out = output_file is not None
     if not save_out:
         # Define dummy names for IO so conf does not crash
-        test_output = "--auto=test/test.out"
+        test_output = "--auto=test.out"
     else:
         test_output = f"--auto={output_file}"
     test_output_bytes = test_output.encode('utf-8') + b'\x00'
@@ -914,8 +914,8 @@ def compute_cross_box_rand(floating[:] data_1_x, #Assumes double precision input
     save_auto = output_auto is not None
     if not save_auto:
         # Define dummy names for IO so conf does not crash
-        auto_output = "--auto=[test/auto_1.out,test/auto_2.out]"
-        cross_output = "--cross=test/cross.out"
+        auto_output = "--auto=[auto_1.out,auto_2.out]"
+        cross_output = "--cross=cross.out"
     else:
         auto_output = f"--auto=[{','.join(output_auto)}]"
         cross_output = f"--cross={output_cross}"
