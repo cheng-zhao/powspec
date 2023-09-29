@@ -90,6 +90,7 @@ typedef struct {
   bool oheader;         /* OUTPUT_HEADER   */
   int ovwrite;          /* OVERWRITE       */
   bool verbose;         /* VERBOSE         */
+  bool has_randoms;     /* HAS RANDOMS     */ 
 } CONF;
 
 
@@ -115,5 +116,12 @@ Arguments:
   * `conf`:     the structure for storing configurations.
 ******************************************************************************/
 void conf_destroy(CONF *conf);
+
+
+CONF *conf_init(void);
+
+
+int check_cosmo_lib(double *omega_m, double *omega_l,
+    double *omega_k, double *eos_w);
 
 #endif

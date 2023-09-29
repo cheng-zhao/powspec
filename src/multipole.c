@@ -1043,6 +1043,8 @@ Arguments:
 ******************************************************************************/
 static void count_mode(const CATA *cat, const MESH *mesh, PK *pk,
     const int idx, const int ell, const int verb) {
+        //printf("%lf\n",cat->norm[idx]);
+
   /* Deal with simulation boxes separately. */
   if (pk->issim) {
     if (idx < 0) {      /* cross power spectrum */

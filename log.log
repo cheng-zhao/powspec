@@ -1,0 +1,20 @@
+src/pypowspec.c: In function ‘__pyx_f_9pypowspec_init_conf’:
+src/pypowspec.c:2956:23: warning: assignment to ‘_Bool *’ from incompatible pointer type ‘int *’ [-Wincompatible-pointer-types]
+ 2956 |   __pyx_v_conf->dcnvt = __pyx_v_dcnvt;
+      |                       ^
+src/pypowspec.c:2965:23: warning: assignment to ‘_Bool *’ from incompatible pointer type ‘int *’ [-Wincompatible-pointer-types]
+ 2965 |   __pyx_v_conf->rcnvt = __pyx_v_rcnvt;
+      |                       ^
+src/pypowspec.c: In function ‘__pyx_f_9pypowspec__numpy_to_cata’:
+src/pypowspec.c:4767:35: warning: comparison of integer expressions of different signedness: ‘size_t’ {aka ‘long unsigned int’} and ‘Py_ssize_t’ {aka ‘long int’} [-Wsign-compare]
+ 4767 |     for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
+      |                                   ^
+src/pypowspec.c:4937:35: warning: comparison of integer expressions of different signedness: ‘size_t’ {aka ‘long unsigned int’} and ‘Py_ssize_t’ {aka ‘long int’} [-Wsign-compare]
+ 4937 |     for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
+      |                                   ^
+src/pypowspec.c:2899:14: warning: ‘__pyx_f_9pypowspec_init_conf’ defined but not used [-Wunused-function]
+ 2899 | static CONF *__pyx_f_9pypowspec_init_conf(int __pyx_v_ndata, int __pyx_v_issim, int *__pyx_v_dcnvt, int *__pyx_v_rcnvt, double __pyx_v_omega_m, double __pyx_v_omega_l, double __pyx_v_omega_k, double __pyx_v_eos_w, double *__pyx_v_los, CYTHON_UNUSED double __pyx_v_bsize, CYTHON_UNUSED double __pyx_v_bpad) {
+      |              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: src/pypowspec.pyx:14:22: Obtaining 'char *' from externally modifiable global Python value
+interrupted
+make: *** [Makefile:2: all] Error 1

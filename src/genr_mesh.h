@@ -56,6 +56,7 @@ typedef struct {
   double smin[3];               /* lower boundary for the interlaced box */
   double bsize[3];              /* box size                              */
   bool issim;                   /* whether this is for a simulation box  */
+  bool has_randoms;             /* whether this has randoms              */
   bool intlace;                 /* whether grid interlacing is enabled   */
   bool fft_init;                /* whether FFTW has been initialised     */
   powspec_assign_t assign;      /* particle assignment scheme            */
@@ -85,12 +86,15 @@ Return:
 ******************************************************************************/
 MESH *genr_mesh(const CONF *conf, CATA *cat);
 
+MESH *genr_mesh_from_mesh(const CONF *conf, double *raw_mesh, CATA* cata);
+
 /******************************************************************************
 Function `mesh_destroy`:
   Deconstruct the interface for meshes.
 Arguments:
   * `mesh`:     the structure for storing the meshes and FFT plans.
 ******************************************************************************/
+
 void mesh_destroy(MESH *mesh);
 
 #endif

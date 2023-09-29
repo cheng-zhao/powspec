@@ -326,7 +326,7 @@ Function `conf_init`:
 Return:
   Address of the structure.
 ******************************************************************************/
-static CONF *conf_init(void) {
+CONF *conf_init(void) {
   CONF *conf = calloc(1, sizeof *conf);
   if (!conf) return NULL;
   conf->fconf = NULL;
@@ -428,14 +428,13 @@ static cfg_t *conf_read(CONF *conf, const int argc, char *const *argv) {
   if (cfg_read_opts(cfg, argc, argv, POWSPEC_PRIOR_CMD, &optidx))
     P_CFG_ERR(cfg);
   P_CFG_WRN(cfg);
-
+  
   /* Read parameters from configuration file. */
   if (!cfg_is_set(cfg, &conf->fconf)) conf->fconf = DEFAULT_CONF_FILE;
   if (access(conf->fconf, R_OK))
     P_WRN("cannot access the configuration file: `%s'\n", conf->fconf);
   else if (cfg_read_file(cfg, conf->fconf, POWSPEC_PRIOR_FILE)) P_CFG_ERR(cfg);
   P_CFG_WRN(cfg);
-
   return cfg;
 }
 
@@ -559,6 +558,7 @@ static int check_file_fmt(const cfg_t *cfg, const int num, const char *name,
     P_ERR(FMT_KEY(%s_CATALOG) " is not set\n", name);
     return POWSPEC_ERR_CFG;
   }
+  
   if (n < num) {
     P_ERR("too few elements of " FMT_KEY(%s_CATALOG) " (" FMT_KEY(OUTPUT_AUTO)
         " or " FMT_KEY(OUTPUT_CROSS) " may require more catalogs)\n", name);
@@ -743,7 +743,7 @@ Arguments:
 Return:
   Zero on success; non-zero on error.
 ******************************************************************************/
-static int check_cosmo(const cfg_t *cfg, double *omega_m, double *omega_l,
+int check_cosmo(const cfg_t *cfg, double *omega_m, double *omega_l,
     double *omega_k, double *eos_w) {
   /* Check OMEGA_M. */
   if (!cfg_is_set(cfg, omega_m)) {
@@ -768,6 +768,53 @@ static int check_cosmo(const cfg_t *cfg, double *omega_m, double *omega_l,
 
   /* Check DE_EOS_W. */
   if (!cfg_is_set(cfg, eos_w)) *eos_w = -1;
+  else if (*eos_w > -1 / (double) 3) {
+    P_ERR(FMT_KEY(DE_EOS_W) " must be <= -1/3\n");
+    return POWSPEC_ERR_CFG;
+  }
+
+  /* Finally, make sure that H^2 (z) > 0. */
+  double w3 = *eos_w * 3;
+  double widx = w3 + 1;
+  if (*omega_k * pow(*omega_l * (-widx), widx / w3) <=
+      *omega_l * w3 * pow(*omega_m, widx / w3)) {
+    P_ERR("negative H^2 given the cosmological parameters\n");
+    return POWSPEC_ERR_CFG;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+Function `check_cosmo`:
+  Verify cosmological parameters for coordinate conversion.
+Arguments:
+  * `cfg`:      interface of libcfg;
+  * `omega_m`:  Omega_m;
+  * `omega_l`:  Omega_l;
+  * `omega_k`:  Omega_k;
+  * `eos_w`:    w.
+Return:
+  Zero on success; non-zero on error.
+******************************************************************************/
+int check_cosmo_lib(double *omega_m, double *omega_l,
+    double *omega_k, double *eos_w) {
+  /* Check OMEGA_M. */
+  
+  if (*omega_m <= 0 || *omega_m > 1) {
+    P_ERR(FMT_KEY(OMEGA_M) " must be > 0 and <= 1\n");
+    return POWSPEC_ERR_CFG;
+  }
+
+  /* Check OMEGA_LAMBDA */
+  if (*omega_l < 0) {
+    P_ERR(FMT_KEY(OMEGA_LAMBDA) " must be >= 0\n");
+    return POWSPEC_ERR_CFG;
+  }
+  else *omega_k = 1 - *omega_m - *omega_l;
+
+  /* Check DE_EOS_W. */
+  if (eos_w == NULL) *eos_w = -1;
   else if (*eos_w > -1 / (double) 3) {
     P_ERR(FMT_KEY(DE_EOS_W) " must be <= -1/3\n");
     return POWSPEC_ERR_CFG;
@@ -876,6 +923,7 @@ Return:
 ******************************************************************************/
 static int conf_verify(const cfg_t *cfg, CONF *conf) {
   int i, e, num;
+  
   /* Check CUBIC_SIM first, since it decides whether random is needed. */
   if (!cfg_is_set(cfg, &conf->issim)) {
     P_ERR(FMT_KEY(CUBIC_SIM) " is not set\n");
@@ -918,33 +966,33 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
     P_ERR("no output file specified\n");
     return POWSPEC_ERR_CFG;
   }
-
+  
   /* Check format settings of DATA_CATALOG. */
-  if ((e = check_file_fmt(cfg, conf->ndata, "DATA", conf->issim,
-      &conf->dfname, conf->has_asc, &conf->dftype, &conf->dskip,
-      &conf->dcmt, &conf->dfmtr, &conf->dpos, &conf->dwcomp, &conf->dwfkp,
-      &conf->dnz, &conf->dsel, &conf->dcnvt))) return e;
+  //if ((e = check_file_fmt(cfg, conf->ndata, "DATA", conf->issim,
+  //    &conf->dfname, conf->has_asc, &conf->dftype, &conf->dskip,
+  //    &conf->dcmt, &conf->dfmtr, &conf->dpos, &conf->dwcomp, &conf->dwfkp,
+  //    &conf->dnz, &conf->dsel, &conf->dcnvt))) return e;
 
-  for (i = 0; i < conf->ndata; i++)
-    if ((e = check_input(conf->dfname[i], "DATA_CATALOG"))) return e;
+  //for (i = 0; i < conf->ndata; i++)
+  //  if ((e = check_input(conf->dfname[i], "DATA_CATALOG"))) return e;
 
-  if (!conf->issim) {
-    /* Check format settings of RAND_CATALOG. */
-    if ((e = check_file_fmt(cfg, conf->ndata, "RAND", conf->issim,
-        &conf->rfname, conf->has_asc + 1, &conf->rftype, &conf->rskip,
-        &conf->rcmt, &conf->rfmtr, &conf->rpos, &conf->rwcomp, &conf->rwfkp,
-        &conf->rnz, &conf->rsel, &conf->rcnvt))) return e;
+  //if (!conf->issim) {
+  //  /* Check format settings of RAND_CATALOG. */
+  //  if ((e = check_file_fmt(cfg, conf->ndata, "RAND", conf->issim,
+  //      &conf->rfname, conf->has_asc + 1, &conf->rftype, &conf->rskip,
+  //      &conf->rcmt, &conf->rfmtr, &conf->rpos, &conf->rwcomp, &conf->rwfkp,
+  //      &conf->rnz, &conf->rsel, &conf->rcnvt))) return e;
 
-    for (i = 0; i < conf->ndata; i++)
-      if ((e = check_input(conf->dfname[i], "RAND_CATALOG"))) return e;
+  //  for (i = 0; i < conf->ndata; i++)
+  //    if ((e = check_input(conf->dfname[i], "RAND_CATALOG"))) return e;
 
-    /* Check DATA_NZ and RAND_NZ. */
-    if (!(conf->dnz) && !(conf->rnz)) {
-      P_ERR(FMT_KEY(DATA_NZ) " and " FMT_KEY(RAND_NZ) " are both not set\n");
-      return POWSPEC_ERR_CFG;
-    }
-  }
-
+  //  /* Check DATA_NZ and RAND_NZ. */
+  //  if (!(conf->dnz) && !(conf->rnz)) {
+  //    P_ERR(FMT_KEY(DATA_NZ) " and " FMT_KEY(RAND_NZ) " are both not set\n");
+  //    return POWSPEC_ERR_CFG;
+  //  }
+  //}
+  
   /* Check if coordinate coversion is required. */
   conf->cnvt = false;
   if (!conf->issim) {
@@ -969,6 +1017,7 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
       else conf->cnvt = DEFAULT_CONVERT;
     }
   }
+  
   /* Check the fiducial cosmology. */
   if (conf->cnvt) {
     /* Check Z_CMVDST_CNVT. */
@@ -987,7 +1036,7 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
       }
     }
   }
-
+  
   /* Check LINE_OF_SIGHT. */
   if (conf->issim) {
     if ((num = cfg_get_size(cfg, &conf->los))) {
@@ -1011,10 +1060,10 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
       conf->los[2] = 1;
     }
   }
-
+  
   /* Check BOX_SIZE and BOX_PAD. */
   if ((e = check_box(cfg, conf->issim, &conf->bsize, &conf->bpad))) return e;
-
+  
   /* Check GRID_SIZE. */
   if (!cfg_is_set(cfg, &conf->gsize)) {
     P_ERR(FMT_KEY(GRID_SIZE) " is not set\n");
@@ -1044,7 +1093,7 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
         return POWSPEC_ERR_CFG;
     }
   }
-
+  
   /* Check GRID_INTERLACE. */
   if (!cfg_is_set(cfg, &conf->intlace)) conf->intlace = DEFAULT_GRID_INTERLACE;
 
@@ -1121,13 +1170,15 @@ static int conf_verify(const cfg_t *cfg, CONF *conf) {
       return POWSPEC_ERR_CFG;
     }
   }
-
+  
   /* Check OUTPUT_HEADER. */
   if (!cfg_is_set(cfg, &conf->oheader)) conf->oheader = DEFAULT_HEADER;
-
+  
   /* Check VERBOSE. */
   if (!cfg_is_set(cfg, &conf->verbose)) conf->verbose = DEFAULT_VERBOSE;
+  
   return 0;
+  
 }
 
 
@@ -1142,57 +1193,58 @@ Arguments:
   * `conf`:     structure for storing configurations.
 ******************************************************************************/
 static void conf_print(const CONF *conf) {
+  
   /* Configuration file */
   printf("\n  CONFIG_FILE     = %s", conf->fconf);
-
+  
   /* Data catalog. */
   const bool twocat = (conf->ndata == 2) ? true : false;
-  printf("\n  DATA_CATALOG    = %s", conf->dfname[0]);
-  if (twocat) printf("\n                    %s", conf->dfname[1]);
-  int tmp = (conf->dftype) ? conf->dftype[0] : DEFAULT_FILE_FORMAT;
-  printf("\n  DATA_FORMAT     = %s", powspec_ffmt_names[tmp]);
-  if (twocat) {
-    tmp = (conf->dftype) ? conf->dftype[1] : DEFAULT_FILE_FORMAT;
-    printf(" , %s", powspec_ffmt_names[tmp]);
-  }
+  //printf("\n  DATA_CATALOG    = %s", conf->dfname[0]);
+  //if (twocat) printf("\n                    %s", conf->dfname[1]);
+  //int tmp = (conf->dftype) ? conf->dftype[0] : DEFAULT_FILE_FORMAT;
+  //printf("\n  DATA_FORMAT     = %s", powspec_ffmt_names[tmp]);
+  //if (twocat) {
+  //  tmp = (conf->dftype) ? conf->dftype[1] : DEFAULT_FILE_FORMAT;
+  //  printf(" , %s", powspec_ffmt_names[tmp]);
+  //}
 
-  if (conf->has_asc[0]) {
-    if (conf->dskip) {
-      printf("\n  DATA_SKIP       = %ld", conf->dskip[0]);
-      if (twocat) printf(" , %ld", conf->dskip[1]);
-    }
-    if (conf->dcmt) {
-      printf("\n  DATA_COMMENT    = '%c'", conf->dcmt[0]);
-      if (twocat) printf(" , '%c'", conf->dcmt[1]);
-    }
-    printf("\n  DATA_FORMATTER  = %s", conf->dfmtr[0]);
-    if (twocat) printf("\n                    %s", conf->dfmtr[1]);
-  }
-  printf("\n  DATA_POSITION   = %s , %s , %s",
-      conf->dpos[0], conf->dpos[1], conf->dpos[2]);
-  if (twocat) printf("\n                    %s , %s , %s",
-      conf->dpos[3], conf->dpos[4], conf->dpos[5]);
+  //if (conf->has_asc[0]) {
+  //  if (conf->dskip) {
+  //    printf("\n  DATA_SKIP       = %ld", conf->dskip[0]);
+  //    if (twocat) printf(" , %ld", conf->dskip[1]);
+  //  }
+  //  if (conf->dcmt) {
+  //    printf("\n  DATA_COMMENT    = '%c'", conf->dcmt[0]);
+  //    if (twocat) printf(" , '%c'", conf->dcmt[1]);
+  //  }
+  //  printf("\n  DATA_FORMATTER  = %s", conf->dfmtr[0]);
+  //  if (twocat) printf("\n                    %s", conf->dfmtr[1]);
+  //}
+  //printf("\n  DATA_POSITION   = %s , %s , %s",
+  //    conf->dpos[0], conf->dpos[1], conf->dpos[2]);
+  //if (twocat) printf("\n                    %s , %s , %s",
+  //    conf->dpos[3], conf->dpos[4], conf->dpos[5]);
 
-  if (conf->dwcomp) {
-    printf("\n  DATA_WT_COMP    = %s", conf->dwcomp[0]);
-    if (twocat) printf(" , %s", conf->dwcomp[1]);
-  }
+  //if (conf->dwcomp) {
+  //  printf("\n  DATA_WT_COMP    = %s", conf->dwcomp[0]);
+  //  if (twocat) printf(" , %s", conf->dwcomp[1]);
+  //}
 
-  if (!conf->issim) {
-    if (conf->dwfkp) {
-      printf("\n  DATA_WT_FKP     = %s", conf->dwfkp[0]);
-      if (twocat) printf(" , %s", conf->dwfkp[1]);
-    }
-    if (conf->dnz) {
-      printf("\n  DATA_NZ         = %s", conf->dnz[0]);
-      if (twocat) printf(" , %s", conf->dnz[1]);
-    }
-  }
+  //if (!conf->issim) {
+  //  if (conf->dwfkp) {
+  //    printf("\n  DATA_WT_FKP     = %s", conf->dwfkp[0]);
+  //    if (twocat) printf(" , %s", conf->dwfkp[1]);
+  //  }
+  //  if (conf->dnz) {
+  //    printf("\n  DATA_NZ         = %s", conf->dnz[0]);
+  //    if (twocat) printf(" , %s", conf->dnz[1]);
+  //  }
+  //}
 
-  if (conf->dsel) {
-    printf("\n  DATA_SELECTION  = %s", conf->dsel[0]);
-    if (twocat) printf("\n                    %s", conf->dsel[1]);
-  }
+  //if (conf->dsel) {
+  //  printf("\n  DATA_SELECTION  = %s", conf->dsel[0]);
+  //  if (twocat) printf("\n                    %s", conf->dsel[1]);
+  //}
   if (!conf->issim) {
     if (conf->dcnvt) {
       printf("\n  DATA_CONVERT    = %c", conf->dcnvt[0] ? 'T' : 'F');
@@ -1206,50 +1258,50 @@ static void conf_print(const CONF *conf) {
 
   /* Random catalog. */
   if (!conf->issim) {
-    printf("\n  RAND_CATALOG    = %s", conf->rfname[0]);
-    if (twocat) printf("\n                    %s", conf->rfname[1]);
-    tmp = (conf->rftype) ? conf->rftype[0] : DEFAULT_FILE_FORMAT;
-    printf("\n  RAND_FORMAT     = %s", powspec_ffmt_names[tmp]);
-    if (twocat) {
-      tmp = (conf->rftype) ? conf->rftype[1] : DEFAULT_FILE_FORMAT;
-      printf(" , %s", powspec_ffmt_names[tmp]);
-    }
+    //printf("\n  RAND_CATALOG    = %s", conf->rfname[0]);
+    //if (twocat) printf("\n                    %s", conf->rfname[1]);
+    //tmp = (conf->rftype) ? conf->rftype[0] : DEFAULT_FILE_FORMAT;
+    //printf("\n  RAND_FORMAT     = %s", powspec_ffmt_names[tmp]);
+    //if (twocat) {
+    //  tmp = (conf->rftype) ? conf->rftype[1] : DEFAULT_FILE_FORMAT;
+    //  printf(" , %s", powspec_ffmt_names[tmp]);
+    //}
   
-    if (conf->has_asc[1]) {
-      if (conf->rskip) {
-        printf("\n  RAND_SKIP       = %ld", conf->rskip[0]);
-        if (twocat) printf(" , %ld", conf->rskip[1]);
-      }
-      if (conf->rcmt) {
-        printf("\n  RAND_COMMENT    = '%c'", conf->rcmt[0]);
-        if (twocat) printf(" , '%c'", conf->rcmt[1]);
-      }
-      printf("\n  RAND_FORMATTER  = %s", conf->rfmtr[0]);
-      if (twocat) printf("\n                    %s", conf->rfmtr[1]);
-    }
-    printf("\n  RAND_POSITION   = %s , %s , %s",
-        conf->rpos[0], conf->rpos[1], conf->rpos[2]);
-    if (twocat) printf("\n                    %s , %s , %s",
-        conf->rpos[3], conf->rpos[4], conf->rpos[5]);
-  
-    if (conf->rwcomp) {
-      printf("\n  RAND_WT_COMP    = %s", conf->rwcomp[0]);
-      if (twocat) printf(" , %s", conf->rwcomp[1]);
-    }
-    if (conf->rwfkp) {
-      printf("\n  RAND_WT_FKP     = %s", conf->rwfkp[0]);
-      if (twocat) printf(" , %s", conf->rwfkp[1]);
-    }
-
-    if (conf->rnz) {
-      printf("\n  RAND_NZ         = %s", conf->rnz[0]);
-      if (twocat) printf(" , %s", conf->rnz[1]);
-    }
-  
-    if (conf->rsel) {
-      printf("\n  RAND_SELECTION  = %s", conf->rsel[0]);
-      if (twocat) printf("\n                    %s", conf->rsel[1]);
-    }
+    //if (conf->has_asc[1]) {
+    //  if (conf->rskip) {
+    //    printf("\n  RAND_SKIP       = %ld", conf->rskip[0]);
+    //    if (twocat) printf(" , %ld", conf->rskip[1]);
+    //  }
+    //  if (conf->rcmt) {
+    //    printf("\n  RAND_COMMENT    = '%c'", conf->rcmt[0]);
+    //    if (twocat) printf(" , '%c'", conf->rcmt[1]);
+    //  }
+    //  printf("\n  RAND_FORMATTER  = %s", conf->rfmtr[0]);
+    //  if (twocat) printf("\n                    %s", conf->rfmtr[1]);
+    //}
+    //printf("\n  RAND_POSITION   = %s , %s , %s",
+    //    conf->rpos[0], conf->rpos[1], conf->rpos[2]);
+    //if (twocat) printf("\n                    %s , %s , %s",
+    //    conf->rpos[3], conf->rpos[4], conf->rpos[5]);
+  //
+    //if (conf->rwcomp) {
+    //  printf("\n  RAND_WT_COMP    = %s", conf->rwcomp[0]);
+    //  if (twocat) printf(" , %s", conf->rwcomp[1]);
+    //}
+    //if (conf->rwfkp) {
+    //  printf("\n  RAND_WT_FKP     = %s", conf->rwfkp[0]);
+    //  if (twocat) printf(" , %s", conf->rwfkp[1]);
+    //}
+//
+    //if (conf->rnz) {
+    //  printf("\n  RAND_NZ         = %s", conf->rnz[0]);
+    //  if (twocat) printf(" , %s", conf->rnz[1]);
+    //}
+  //
+    //if (conf->rsel) {
+    //  printf("\n  RAND_SELECTION  = %s", conf->rsel[0]);
+    //  if (twocat) printf("\n                    %s", conf->rsel[1]);
+    //}
     if (!conf->issim) {
       if (conf->rcnvt) {
         printf("\n  RAND_CONVERT    = %c", conf->rcnvt[0] ? 'T' : 'F');
@@ -1329,7 +1381,6 @@ CONF *load_conf(const int argc, char *const *argv) {
 
   CONF *conf = conf_init();
   if (!conf) return NULL;
-
   cfg_t *cfg = conf_read(conf, argc, argv);
   if (!cfg) {
     conf_destroy(conf);
@@ -1342,7 +1393,7 @@ CONF *load_conf(const int argc, char *const *argv) {
     cfg_destroy(cfg);
     return NULL;
   }
-
+  
   if (conf->verbose) conf_print(conf);
 
   if (cfg_is_set(cfg, &conf->fconf)) free(conf->fconf);

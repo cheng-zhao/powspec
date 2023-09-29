@@ -1,5 +1,180 @@
 # powspec
 
+This repository contains a small Cython wrapper to the original [code](https://github.com/cheng-zhao/powspec) by Cheng Zhao.
+In the current iteration, this wrapper allows to lauch (auto and cross) power spectrum computation from in-memory data in the form of numpy arrays for periodic and non-periodic (survey-like) data. Furthermore, it expands on the original code's capability by allowing the use of randoms for simulation boxes too. This is useful when computing post-BAO reconstruction power spectra where shifted randoms are required.
+
+I have not done many tests but the ones performed show equivalent results to those obtained by directly invoking the C code. Using randoms with boxes was tested with uniform randoms 10x the size of the catalog and show agreement with the C code's periodic box data for the most part (small scales are slightly biased). 
+
+## Use of the Python wrapper
+
+The current implementation still requires the configuration file to be provided. Though this may be changed in the future (either by bypassing the configuration file reader or creating configuration files on-the-fly) the current configuration file reader in this wrapper will not check for `DATA`/`RANDOM` catalogs or associated configuration options (such as formatting) since these are provided to the functions as numpy arrays.
+
+First, compilation of the wrappes should be as easy as the original code. Once the `include` and `lib` dirs have been set in the `setup.py` script, just type `make` and the library will be compiled for your python version.
+
+Once the library is compiled, add the directory containing it to your `PATH`. Here is an example
+
+### Auto power spectrum of simulation boxes
+```python
+import numpy as np
+import sys
+sys.path.append("/global/u1/d/dforero/codes/powspec_py/powspec/")
+from pypowspec import compute_auto_box, compute_cross_box
+
+
+seed = 42
+np.random.seed(seed)
+nobj = int(1e4)
+data = 1000. * np.random.random((nobj, 3)).astype(np.double)
+w = np.ones(nobj)
+pk = compute_auto_box(data[:,0], data[:,1], data[:,2], w, 
+                      powspec_conf_file = "test/powspec_auto.conf",
+                      output_file = "test/box_auto_test.powspec")
+```
+Providing an `output_file` triggers saving of the results in text format (results are still returned in `pk`). Otherwise the user can save `pk` as they please (i.e. binary format). Here `pk` is a dictionary containing the results. The most relevant values are `k`, and `multipoles` the latter of which is a numpy array of shape `(<number_k_bins>, <number_multipoles>)`. Some important metadata is also stored provided such as the `normalisation` and `shot_ noise`.
+
+### Cross power spectrum of simulation boxes
+```python
+import numpy as np
+import sys
+sys.path.append("/global/u1/d/dforero/codes/powspec_py/powspec/")
+from pypowspec import compute_auto_box, compute_cross_box
+
+
+seed = 42
+np.random.seed(seed)
+nobj = int(1e4)
+data = 1000. * np.random.random((nobj, 3)).astype(np.double)
+w = np.ones(nobj)
+# Compute the cross correlation of two catalogs (here using the same catalog)
+pk = compute_cross_box(data[:,0], data[:,1], data[:,2], w, 
+                       data[:,0], data[:,1], data[:,2], w,
+                       powspec_conf_file = "test/powspec_cross.conf",
+                       output_auto = ["test/box_auto_test_1.powspec", "test/box_auto_test_2.powspec"],
+                       output_cross = "test/box_cross_test.powspec")
+```
+Note that here you should be able to avoid computing the auto power spectrum by passing `output_auto = ["", ""]`. Passing the argument `output_auto` triggers the text-file saving of the results of the C code. If it is `None`, the function call will not automatically save the results. 
+Here `pk` is a dictionary containing the results. The most relevant values are `k`, `auto_multipoles` and `cross_multipoles` the latter of which are numpy arrays of shape `(<number_k_bins>, <number_multipoles>)`.
+
+### Auto power spectrum of survey data
+
+For non periodic data it is necessary to provide extra columns. The code expects `RA, DEC, z, W_COMP, W_FKP, NZ` for both data and randoms. All columns must be provided but if your data lacks weights, a column of ones (i.e. `w_comp = w_fkp = np.ones_like(ra)`) can be provided. The radial number density `NZ` must be provided (so normalisation works) but can be a constant array (i.e. `nz = 1e-4 * np.ones_like(ra)`).
+
+Data selection is expected to be none by the user in python. This wrapper bypasses the on-disk data reading and AST parsing of the original C code. Any data transformation should be quick-enough in python against the FFT and mode-counting parts so it is not expected to be a bottleneck.
+
+```python
+import numpy as np
+import sys
+sys.path.append("/global/u1/d/dforero/codes/powspec_py/powspec/")
+from pypowspec import compute_auto_lc, compute_cross_lc
+
+import pandas as pd
+dat_fname = "/global/project/projectdirs/desi/mocks/UNIT/HOD_Shadab/multiple_snapshot_lightcone/UNIT_lightcone_multibox_ELG_footprint_nz_NGC.dat"
+ran_fname = "/global/project/projectdirs/desi/mocks/UNIT/HOD_Shadab/multiple_snapshot_lightcone/UNIT_lightcone_multibox_ELG_footprint_nz_1xdata_5.ran_NGC.dat"
+data = pd.read_csv(dat_fname, usecols = (0,1,3,4), engine='c', delim_whitespace=True, names = ['ra', 'dec', 'zrsd', 'nz']).values
+rand = pd.read_csv(ran_fname, usecols = (0,1,3,4), engine='c', delim_whitespace=True, names = ['ra', 'dec', 'zrsd', 'nz']).values
+# Data selection (redshift range in this case)
+data = data[(data[:,2] > 0.7) & (data[:,2] < 1.)]
+rand = rand[(rand[:,2] > 0.7) & (rand[:,2] < 1.)]
+# FKP weight from NZ
+fkp_data = 1. / (1 + 5000 * data[:,3])
+fkp_rand = 1. / (1 + 5000 * rand[:,3])
+nobj = data.shape[0]
+# Uniform completeness weights
+wdata = np.ones(nobj)
+wrand = np.ones(rand.shape[0])
+
+pk = compute_auto_lc(data[:,0], data[:,1], data[:,2], wdata, fkp_data, data[:,3],
+                    rand[:,0], rand[:,1], rand[:,2], wrand, fkp_rand, rand[:,3],
+                    powspec_conf_file = "test/powspec_lc.conf",
+                    output_file = "test/lc_auto_test.powspec")
+```
+Similar to the box functions, `output_file != None` triggers text result saving.
+
+### Cross power spectrum of survey data
+
+Here we use the same catalog as an example.
+```python
+
+
+import numpy as np
+import sys
+sys.path.append("/global/u1/d/dforero/codes/powspec_py/powspec/")
+from pypowspec import compute_auto_lc, compute_cross_lc
+
+import pandas as pd
+dat_fname = "/global/project/projectdirs/desi/mocks/UNIT/HOD_Shadab/multiple_snapshot_lightcone/UNIT_lightcone_multibox_ELG_footprint_nz_NGC.dat"
+ran_fname = "/global/project/projectdirs/desi/mocks/UNIT/HOD_Shadab/multiple_snapshot_lightcone/UNIT_lightcone_multibox_ELG_footprint_nz_1xdata_5.ran_NGC.dat"
+data = pd.read_csv(dat_fname, usecols = (0,1,3,4), engine='c', delim_whitespace=True, names = ['ra', 'dec', 'zrsd', 'nz']).values
+rand = pd.read_csv(ran_fname, usecols = (0,1,3,4), engine='c', delim_whitespace=True, names = ['ra', 'dec', 'zrsd', 'nz']).values
+# Data selection (redshift range in this case)
+data = data[(data[:,2] > 0.7) & (data[:,2] < 1.)]
+rand = rand[(rand[:,2] > 0.7) & (rand[:,2] < 1.)]
+# FKP weight from NZ
+fkp_data = 1. / (1 + 5000 * data[:,3])
+fkp_rand = 1. / (1 + 5000 * rand[:,3])
+nobj = data.shape[0]
+# Uniform completeness weights
+wdata = np.ones(nobj)
+wrand = np.ones(rand.shape[0])
+
+pk = compute_cross_lc(data[:,0], data[:,1], data[:,2], wdata, fkp_data, data[:,3],
+                    rand[:,0], rand[:,1], rand[:,2], wrand, fkp_rand, rand[:,3],
+                    data[:,0], data[:,1], data[:,2], wdata, fkp_data, data[:,3],
+                    rand[:,0], rand[:,1], rand[:,2], wrand, fkp_rand, rand[:,3],
+                    powspec_conf_file = "test/powspec_lc_cross.conf",
+                    output_auto = ["test/lc_auto_test_1.powspec","test/lc_auto_test_1.powspec"],
+                    output_cross = "test/lc_cross_test.powspec")
+```
+
+### Auto power spectrum of reconstructed boxes
+
+```python
+import numpy as np
+import sys
+sys.path.append("/global/u1/d/dforero/codes/powspec_py/powspec/")
+from pypowspec import compute_auto_box_rand, compute_cross_box_rand
+import pandas as pd
+test_fname = "/global/project/projectdirs/desi/mocks/UNIT/HOD_Shadab/HOD_boxes/redshift0.9873/UNIT_DESI_Shadab_HOD_snap97_ELG_v0.txt"
+data = pd.read_csv(test_fname, usecols = (0,1,3), engine='c', delim_whitespace=True, names = ['x', 'y', 'zrsd']).values
+nobj = data.shape[0]
+rand = (data.max() - data.min()) * np.random.random((10 * nobj, 3)).astype(np.double)
+wdata = np.ones(data.shape[0])
+wrand = np.ones(rand.shape[0])
+pk = compute_auto_box_rand(data[:,0], data[:,1], data[:,2], wdata,
+                      rand[:,0], rand[:,1], rand[:,2], wrand, 
+                      powspec_conf_file = "test/powspec_auto.conf",
+                      output_file = "test/box_auto_test_rand.powspec")
+
+```
+### Cross power spectrum of reconstructed boxes
+
+```python
+import numpy as np
+import sys
+sys.path.append("/global/u1/d/dforero/codes/powspec_py/powspec/")
+from pypowspec import compute_auto_box_rand, compute_cross_box_rand
+import pandas as pd
+test_fname = "/global/project/projectdirs/desi/mocks/UNIT/HOD_Shadab/HOD_boxes/redshift0.9873/UNIT_DESI_Shadab_HOD_snap97_ELG_v0.txt"
+data = pd.read_csv(test_fname, usecols = (0,1,3), engine='c', delim_whitespace=True, names = ['x', 'y', 'zrsd']).values
+nobj = data.shape[0]
+rand = (data.max() - data.min()) * np.random.random((10 * nobj, 3)).astype(np.double)
+wdata = np.ones(data.shape[0])
+wrand = np.ones(rand.shape[0])
+
+pk = compute_cross_box_rand(data[:,0], data[:,1], data[:,2], wdata, 
+                       rand[:,0], rand[:,1], rand[:,2], wrand, 
+                       data[:,0], data[:,1], data[:,2], wdata, 
+                       rand[:,0], rand[:,1], rand[:,2], wrand,
+                       powspec_conf_file = "test/powspec_cross.conf",
+                       output_auto = ["test/box_auto_test_rand_1.powspec", "test/box_auto_test_rand_2.powspec"],
+                       output_cross = "test/box_cross_test_rand.powspec")
+
+```
+
+Please do not hesitate to contact me if you find any bugs. Below, you may find the documentation to the original C code.
+
+# powspec
+
 ![Codacy grade](https://img.shields.io/codacy/grade/5a6835fc4cee49d4993380ad1a45ad69.svg)
 
 ## Table of Contents
