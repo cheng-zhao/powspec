@@ -578,6 +578,88 @@ static int def_box(const CATA *cat, const bool issim, const double *bsize,
   return 0;
 }
 
+
+/******************************************************************************
+Function `def_box_for_mesh`:
+  Define the comoving box for the catalog to be placed in.
+Arguments:
+  * `bsize`:    box size set via configurations;
+  * `bpad`:     box padding length set via configurations;
+  * `size`:     the evaluated box size, if `bsize` is not given;
+  * `bmin`:     the evaluated lower boundary of the box;
+  * `max`:      the upper boundary of coordinates;
+  * `verb`:     indicate whether to show detailed standard outputs.
+Return:
+  Zero on success; non-zero on error.
+******************************************************************************/
+static int def_box_for_mesh(const double *bsize,
+    const double *bpad, double size[3], double bmin[3], double max[3],
+    const int verb) {
+  double min[3];
+  for (int i = 0; i < 3; i++){
+    min[i] = 0;
+    max[i] = bsize[i];
+  }
+  
+  
+  /* Obtain the boundaries of the input catalogs. */
+  
+  const char c[3] = {'x', 'y', 'z'};
+
+  for (int i = 0; i < 3; i++) {
+    if (min[i] > max[i]) {
+      P_ERR("invalid %c boundary value %lf %lf in the configuration\n", c[i], min[i], max[i]);
+      return POWSPEC_ERR_CATA;
+    }
+    /* Verify coordinates of the simulation box. */
+    
+    if (min[i] < 0) {
+      P_ERR("%c coordinate below 0: %lf\n", c[i], min[i]);
+      return POWSPEC_ERR_CATA;
+    }
+    if (max[i] > bsize[i]) {
+      P_ERR("%c coordinate not smaller than BOX_SIZE: %lf\n", c[i], max[i]);
+      return POWSPEC_ERR_CATA;
+    }
+    
+  }
+  
+  size[0] = bsize[0];
+  size[1] = bsize[1];
+  size[2] = bsize[2];
+  bmin[0] = bmin[1] = bmin[2] = 0;
+  return 0;
+  
+
+  /* `BOX_SIZE` is set. */
+  if (bsize) {
+    for (int i = 0; i < 3; i++) {
+      if (max[i] - min[i] > bsize[i]) {
+        P_ERR("BOX_SIZE is too small for the %c coordinates,"
+            " should be at least " OFMT_DBL "\n", c[i], max[i] - min[i]);
+        return POWSPEC_ERR_CATA;
+      }
+      bmin[i] = (max[i] + min[i] - bsize[i]) * 0.5;
+      size[i] = bsize[i];
+    }
+
+    if (verb) {
+      printf("  Box size: [%lg, %lg, %lg]\n"
+          "  Box boundaries: [[%lg,%lg], [%lg,%lg], [%lg,%lg]]\n",
+          size[0], size[1], size[2], bmin[0], bmin[0] + size[0],
+          bmin[1], bmin[1] + size[1], bmin[2], bmin[2] + size[2]);
+    }
+  }
+  /* Determine box size automatically. */
+  else {
+    P_ERR("BOX_SIZE must be set for mesh based calculations\n");
+    return POWSPEC_ERR_CATA;
+  }
+
+  return 0;
+}
+
+
 /******************************************************************************
 Function `shift_cat`:
   Shift the catalog near the boundary if necessary, for periodic confitions.
@@ -864,6 +946,33 @@ static void gen_dens(CATA *cat, MESH *mesh, const int verb) {
   }
 }
 
+/******************************************************************************
+Function `gen_dens_from_mesh`:
+  Generate density fields for the catalogs.
+Arguments:
+  * `raw_mesh`: pointer to meshed data;
+  * `mesh`:     structure for all the meshes;
+  * `verb`:     indicate whether to show detailed standard outputs.
+******************************************************************************/
+static void gen_dens_from_mesh(double *raw_mesh, MESH *mesh, const int verb) {
+  
+  memset(mesh->Fr[0], 0, mesh->Ntot * sizeof(FFT_REAL));
+#ifdef OMP
+#pragma omp parallel for
+#endif
+  for (size_t n = 0; n < mesh->Ntot; n++)
+    mesh->Fr[0][n] = (FFT_REAL) raw_mesh[n];
+      
+  if (verb) {
+    
+    printf("  Density field copied\n");
+  }
+  
+}
+
+
+
+
 
 /*============================================================================*\
                       Interface for generating the meshes
@@ -934,3 +1043,61 @@ MESH *genr_mesh(const CONF *conf, CATA *cat) {
   return mesh;
 }
 
+/*============================================================================*\
+                      Interface for generating the meshes
+\*============================================================================*/
+
+/******************************************************************************
+Function `genr_mesh_from_mesh`:
+  Interface for mesh generation.
+Arguments:
+  * `conf`:     the structure for configurations;
+  * `raw_mesh`: pointer to array containing meshed data.
+  * `cata`:     the structure for catalogs. Stores metadata;
+Return:
+  Address of the structure for all meshes and FFT plans; NULL on error.
+******************************************************************************/
+MESH *genr_mesh_from_mesh(const CONF *conf, double *raw_mesh, CATA* cata) {
+  printf("Generating meshes for FFT ...");
+  if (!conf) {
+    P_ERR("configuration parameters not loaded\n");
+    return NULL;
+  }
+  if (conf->verbose) printf("\n");
+  fflush(stdout);
+
+  /* Initialise the meshes. */
+  MESH *mesh = mesh_init(conf);
+  if (!mesh) {
+    P_ERR("failed to initalise the meshes\n");
+    return NULL;
+  }
+  
+
+  /* Define the box. */
+  if (def_box_for_mesh(conf->bsize, conf->bpad, mesh->bsize,
+        mesh->min, mesh->max, conf->verbose))
+    return NULL;
+  
+  /* Generate the density fields. */
+  gen_dens_from_mesh(raw_mesh, mesh, conf->verbose);
+
+  /* Compute normalisation factor and shot noise for simulation boxes. */
+  
+  double wdata = 0;
+  for (int n = 0; n < mesh->Ntot;n++ )
+    wdata += raw_mesh[n];
+  
+  double vol = mesh->bsize[0] * mesh->bsize[1] * mesh->bsize[2];
+  cata->shot[0] = vol / wdata;
+  cata->norm[0] = wdata * wdata / vol;
+  
+
+  /* Reuse `mesh->smin` for the coordinate on mesh of the lowest box corner. */
+  for (int i = 0; i < 3; i++)
+    mesh->smin[i] = mesh->min[i] * mesh->Ng / mesh->bsize[i];
+
+
+  printf(FMT_DONE);
+  return mesh;
+}

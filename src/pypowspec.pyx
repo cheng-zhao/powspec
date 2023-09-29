@@ -156,6 +156,7 @@ cdef extern from "read_cata.h":
 cdef extern from "powspec.h":
 
     PK *compute_pk(CATA* cata, bint save_out, bint has_randoms, int argc, char* argv[]) nogil;
+    PK* compute_pk_mesh(double *raw_mesh, bint save_out, int argc, char *argv[]) nogil;
 
 # multipole.h
 
@@ -1054,5 +1055,74 @@ def compute_cross_box_rand(floating[:] data_1_x, #Assumes double precision input
     powspec_destroy(pk)
     free(sumw2_dat)
     free(sumw2_ran)
+    
+    return pk_result
+
+
+
+def compute_auto_box_mesh(double[:,:,:] raw_mesh,
+                            powspec_conf_file,
+                            output_file = None):
+
+    
+    save_out = output_file is not None
+    if not save_out:
+        # Define dummy names for IO so conf does not crash
+        test_output = "--auto=test.out"
+    else:
+        test_output = f"--auto={output_file}"
+    test_output_bytes = test_output.encode('utf-8') + b'\x00'
+    cdef char* test_output_string = test_output_bytes
+
+
+    conf = f"--conf={powspec_conf_file}"
+    conf_bytes = conf.encode('utf-8') + b'\x00'
+    cdef char* conf_string = conf_bytes
+
+    
+
+    # Define dummy argc, argv to send to powspec main function
+    # This should remain similar once we generate a conf file.
+    cdef int argc = 3
+    cdef char* argv[3]
+    argv[0] = arg0_str
+    argv[1] = conf_string
+    argv[2] = test_output_string
+
+    # Create CATA structure (involves data copying)
+    #cdef floating *raw_mesh_ptr = &raw_mesh[0]
+    #if not raw_mesh.flags['C_CONTIGUOUS']:
+    #    raw_mesh = np.ascontiguousarray(raw_mesh)
+    
+    cdef PK* pk = compute_pk_mesh(&raw_mesh[0,0,0], <bint> save_out, argc, argv)
+    if pk is NULL: raise ValueError("Could not create PK structure.")
+    pk_result = {}
+    pk_result['n_data_objects'] = 1
+    pk_result['w_data_objects'] = np.sum(raw_mesh)
+    pk_result['shot_noise'] = np.nan
+    pk_result['normalisation'] = np.nan
+    pk_result['k'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['kmin'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['kmax'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['kavg'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['nmodes'] = np.empty(pk.nbin, dtype = np.double) 
+    pk_result['multipoles'] = np.empty((pk.nbin, pk.nl), dtype = np.double) 
+    
+
+   
+    for i in range(pk.nbin):
+        pk_result['k'][i] = pk.k[i]
+        pk_result['kavg'][i] = pk.km[i]
+        pk_result['kmin'][i] = pk.kedge[i]
+        pk_result['kmax'][i] = pk.kedge[i+1]
+        pk_result['nmodes'][i] = pk.cnt[i]
+        for j in range(pk.nl):
+            pk_result['multipoles'][i,j] = pk.pl[0][j][i]
+        
+        #printf("%lf %lf %lf %lf\n", pk.k[i], pk.pl[0][0][i], pk.pl[0][1][i], pk.pl[0][2][i])
+
+    
+    powspec_destroy(pk)
+    
     
     return pk_result

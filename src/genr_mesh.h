@@ -86,12 +86,15 @@ Return:
 ******************************************************************************/
 MESH *genr_mesh(const CONF *conf, CATA *cat);
 
+MESH *genr_mesh_from_mesh(const CONF *conf, double *raw_mesh, CATA* cata);
+
 /******************************************************************************
 Function `mesh_destroy`:
   Deconstruct the interface for meshes.
 Arguments:
   * `mesh`:     the structure for storing the meshes and FFT plans.
 ******************************************************************************/
+
 void mesh_destroy(MESH *mesh);
 
 #endif
